@@ -95,11 +95,11 @@ const Reservation: React.FC = () => {
                </div>
 
                <div className={styles.rightSide}>
-                    <h2>Уже записаны? Введите секретный код для отмены</h2>
+                    <h2>Уже записаны? Введите номер записи для отмены</h2>
                     <form onSubmit={handleSubmit}>
                          <input
                               type="text"
-                              placeholder="Секретный код"
+                              placeholder="код записи"
                               value={secretCode}
                               onChange={handleCodeChange}
                               className="input"

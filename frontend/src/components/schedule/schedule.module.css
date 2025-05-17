@@ -1,0 +1,141 @@
+.container {
+     display: flex;
+     gap: 2rem;
+     padding: 2rem;
+     background-color: #f9f9f9;
+}
+
+.left {
+     flex: 1;
+     max-width: 300px;
+}
+
+.right {
+     flex: 2;
+}
+
+.profile {
+     background-color: #fff;
+     border-radius: 8px;
+     padding: 1rem;
+     text-align: center;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.avatar {
+     width: 100px;
+     height: 100px;
+     border-radius: 50%;
+     object-fit: cover;
+     margin-bottom: 0.1rem;
+     margin-top: 2rem;
+}
+
+
+.form {
+     display: flex;
+     flex-direction: column;
+     flex-wrap: wrap;
+     gap: 1.2rem;
+     background-color: #fff;
+     border-radius: 8px;
+     padding: 2rem;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form h2 {
+     margin-top: 0;
+     margin-bottom: 0.1rem;
+}
+
+.sectionsWrapper {
+     display: flex;
+     justify-content: space-between;
+     align-items: flex-start;
+     flex-wrap: nowrap;
+     gap: 2rem;
+}
+
+
+.section {
+     flex: 1 1 45%;
+     min-width: 300px;
+}
+
+.timeInput {
+     display: flex;
+     align-items: center;
+     gap: 0.5rem;
+     margin-bottom: 1rem;
+}
+
+.timeInput input[type="time"] {
+     padding: 0.5rem;
+     font-size: 1rem;
+}
+
+.timeInput button {
+     padding: 0.5rem 1rem;
+     font-size: 1rem;
+     cursor: pointer;
+}
+
+ul {
+     list-style: none;
+     padding: 0;
+     display: flex;
+     flex-wrap: wrap;
+     gap: 1rem;
+}
+
+ul li {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     width: 30%;
+}
+
+ul li button {
+     background: none;
+     border: none;
+     color: red;
+     cursor: pointer;
+     font-size: 1.2rem;
+}
+
+.daysList {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 1rem;
+}
+
+.daysList>div {
+     display: flex;
+     justify-content: space-between;
+     margin-top: 0.5rem;
+     padding: 0.3rem 0.5rem;
+     background-color: #eee;
+     border-radius: 4px;
+     width: 30%;
+}
+
+.daysList button {
+     background: none;
+     border: none;
+     color: red;
+     cursor: pointer;
+     font-size: 1rem;
+}
+
+.row {
+     display: flex;
+     flex-wrap: nowrap;
+     gap: 2rem;
+     width: 100%;
+     align-items: flex-start;
+}
+
+.section {
+     flex: 1;
+     min-width: 300px;
+}
