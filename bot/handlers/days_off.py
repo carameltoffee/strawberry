@@ -8,7 +8,7 @@ days_off_router = Router()
 
 @days_off_router.message(F.text == "Добавить выходной")
 async def cmd_add_day_off(message: Message, state: FSMContext):
-    await message.answer("Введите дни выходных (ГГГГ-ММ-ДД через пробел или с новой строки):")
+    await message.answer("📆 Введите дни выходных (ГГГГ-ММ-ДД через пробел или с новой строки):")
     await state.set_state(States.choose_weekend_days)
 
 @days_off_router.message(States.choose_weekend_days)
@@ -26,7 +26,7 @@ async def process_add_day_off(message: Message, state: FSMContext):
 
 @days_off_router.message(F.text == "Удалить выходной")
 async def cmd_remove_day_off(message: Message, state: FSMContext):
-    await message.answer("Введите даты для удаления (ГГГГ-ММ-ДД):")
+    await message.answer("📆 Введите даты для удаления (ГГГГ-ММ-ДД):")
     await state.set_state(States.remove_weekend_days)
 
 @days_off_router.message(States.remove_weekend_days)
