@@ -7,18 +7,17 @@ type Service struct {
 	Appointments
 }
 
-type Users interface {}
+type Users interface{}
 
-type Appointments interface {}
+type Appointments interface{}
 
 type Deps struct {
-	r *repository.Repository 
+	r *repository.Repository
 }
 
 func New(d *Deps) *Service {
 	return &Service{
-		// Users: newUsersService(),
-		// Appointments: newAppointmentsService(),
+		Users:        newUsersService(d.r),
+		Appointments: newAppointmentsService(d.r),
 	}
 }
-
