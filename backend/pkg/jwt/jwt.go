@@ -24,6 +24,7 @@ type JwtManagerKeyTTL struct {
 
 type CustomClaims struct {
 	Username string `json:"username"`
+	Id       int64  `json:"id"`
 	jwt.RegisteredClaims
 }
 
@@ -34,9 +35,10 @@ func NewJwtManagerKeyTTL(secretKey string, ttl time.Duration) *JwtManagerKeyTTL 
 	}
 }
 
-func (m *JwtManagerKeyTTL) Generate(username string) (string, error) {
+func (m *JwtManagerKeyTTL) Generate(username string, id int64) (string, error) {
 	claims := CustomClaims{
 		Username: username,
+		Id:       id,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.TTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
