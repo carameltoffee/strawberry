@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+var validStatuses = map[string]bool{
+	"pending":   true,
+	"confirmed": true,
+	"canceled":  true,
+	"completed": true,
+}
+
 type Appointment struct {
 	ID          int       `json:"id"`
 	UserID      int       `json:"user_id"`
@@ -14,7 +21,7 @@ type Appointment struct {
 	Status      string    `json:"status"`
 }
 
-func ValidateAppointment(a *Appointment) error {
+func (a *Appointment) Validate() error {
 	if a.UserID <= 0 {
 		return errors.New("user_id must be positive")
 	}
@@ -30,12 +37,6 @@ func ValidateAppointment(a *Appointment) error {
 		return errors.New("scheduled_at must be in the future")
 	}
 
-	validStatuses := map[string]bool{
-		"pending":   true,
-		"confirmed": true,
-		"canceled":  true,
-		"completed": true,
-	}
 	if !validStatuses[a.Status] {
 		return errors.New("invalid status value")
 	}

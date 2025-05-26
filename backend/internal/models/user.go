@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID             int    `json:"id"`
+	ID             int64  `json:"id"`
 	FullName       string `json:"full_name"`
 	Username       string `json:"username"`
 	Password       string
@@ -17,7 +17,7 @@ type User struct {
 	Specialization string    `json:"specialization"`
 }
 
-func ValidateUser(u *User) error {
+func (u *User) Validate() error {
 	if len(strings.TrimSpace(u.FullName)) < 2 || len(u.FullName) > 255 {
 		return errors.New("full name must be between 2 and 255 characters")
 	}
