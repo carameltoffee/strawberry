@@ -13,7 +13,7 @@ var (
 )
 
 type JwtManager interface {
-	Generate(username string) (string, error)
+	Generate(username string, id int64) (string, error)
 	Verify(token string) (*jwt.MapClaims, error)
 }
 
