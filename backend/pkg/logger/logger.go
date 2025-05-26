@@ -18,8 +18,8 @@ func init() {
 	}
 }
 
-func WithLogger(ctx context.Context, logger *zap.Logger) context.Context {
-	return context.WithValue(ctx, ctxKey{}, logger)
+func WithLogger(ctx context.Context) context.Context {
+	return context.WithValue(ctx, ctxKey{}, defaultLogger)
 }
 
 func FromContext(ctx context.Context) *zap.Logger {

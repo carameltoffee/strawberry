@@ -3,23 +3,15 @@ package logger
 import (
 	"context"
 	"testing"
-
-	"go.uber.org/zap"
 )
 
 func TestWithLoggerAndFromContext(t *testing.T) {
 	ctx := context.Background()
 
-	customLogger, err := zap.NewDevelopment()
-	if err != nil {
-		t.Fatalf("failed to create zap logger: %v", err)
-	}
-	defer customLogger.Sync()
-
-	ctxWithLogger := WithLogger(ctx, customLogger)
+	ctxWithLogger := WithLogger(ctx)
 
 	got := FromContext(ctxWithLogger)
-	if got != customLogger {
+	if got == nil {
 		t.Error("FromContext did not return the logger stored in context")
 	}
 }
@@ -38,14 +30,7 @@ func TestFromContextReturnsDefaultIfMissing(t *testing.T) {
 
 func TestSugarFromContext(t *testing.T) {
 	ctx := context.Background()
-
-	customLogger, err := zap.NewDevelopment()
-	if err != nil {
-		t.Fatalf("failed to create zap logger: %v", err)
-	}
-	defer customLogger.Sync()
-
-	ctxWithLogger := WithLogger(ctx, customLogger)
+	ctxWithLogger := WithLogger(ctx)
 
 	sugar := SugarFromContext(ctxWithLogger)
 	if sugar == nil {
