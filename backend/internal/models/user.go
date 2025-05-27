@@ -8,12 +8,12 @@ import (
 )
 
 type User struct {
-	ID             int64  `json:"id"`
+	Id             int64  `json:"id"`
 	FullName       string `json:"full_name"`
 	Username       string `json:"username"`
 	Password       string
 	RegisteredAt   time.Time `json:"registered_at"`
-	AverageRating  float32   `json:"average_rating"`
+	AverageRating  float64   `json:"average_rating"`
 	Specialization string    `json:"specialization"`
 }
 

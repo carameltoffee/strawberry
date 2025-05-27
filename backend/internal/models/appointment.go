@@ -14,8 +14,8 @@ var validStatuses = map[string]bool{
 
 type Appointment struct {
 	ID          int       `json:"id"`
-	UserID      int       `json:"user_id"`
-	MasterID    int       `json:"master_id"`
+	UserID      int64     `json:"user_id"`
+	MasterID    int64     `json:"master_id"`
 	ScheduledAt time.Time `json:"scheduled_at"`
 	CreatedAt   time.Time `json:"created_at"`
 	Status      string    `json:"status"`
