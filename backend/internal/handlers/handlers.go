@@ -1,27 +1,31 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"strawberry/internal/service"
 
-type Handler struct{}
+	"github.com/gin-gonic/gin"
+)
+
+type Handler struct {
+	s *service.Service
+}
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	r := gin.Default()
 	api := r.Group("api")
 	{
 		//registration and login user
-		api.POST("/register")
-		api.POST("/login")
-		//get user's bookings
-		api.GET("/bookings")
-
-		//get masters/by id
-		api.GET("/masters")
-		api.GET("/masters/:id")
-
-		//create,update,delete a booking
-		api.POST("/bookings")
-		api.PUT("/bookings/:id")
-		api.DELETE("/bookings/:id")
+		api.POST("/register", h.Register)
+		api.POST("/login", h.Login)
+		
+		//get masters/by username
+		api.GET("/masters", h.GetMasters)
+		api.GET("/masters/:username", h.GetMasterByUsername)
+		
+		//create,get, delete an appointment
+		api.GET("/appointments", h.GetAppointments)
+		api.POST("/appointments", h.CreateAppointment)
+		api.DELETE("/appointments/:id", h.DeleteAppointment)
 	}
 	return r
 }
