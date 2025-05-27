@@ -49,9 +49,13 @@ func (s *AppointmentsService) Create(ctx context.Context, a *models.Appointment)
 	return id, nil
 }
 
-func (s *AppointmentsService) Delete(ctx context.Context, id int64) error {
+func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64) error {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
+
+	if id != userId {
+		return ErrUnauthorized
+	}
 
 	err := s.r.Appointments.Delete(ctx, id)
 	if err != nil {

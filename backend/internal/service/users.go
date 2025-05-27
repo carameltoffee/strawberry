@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"strawberry/internal/models"
 	"strawberry/internal/repository"
@@ -18,7 +17,17 @@ var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrInternal           = errors.New("internal server error")
 	ErrUserNotFound       = errors.New("user not found")
+	ErrUserExists         = errors.New("user exists")
+	ErrUnauthorized       = errors.New("unauthorized")
 )
+
+type ValidationError struct {
+	Msg string
+}
+
+func (v ValidationError) Error() string {
+	return v.Msg
+}
 
 type UsersService struct {
 	r *repository.Repository
@@ -40,14 +49,16 @@ func (s *UsersService) Create(ctx context.Context, u *models.User) (int64, error
 
 	if err := u.Validate(); err != nil {
 		l.Warn("invalid user data", zap.Error(err))
-		return 0, fmt.Errorf("validation failed: %w", err)
+		return 0, ValidationError{
+			Msg: err.Error(),
+		}
 	}
 
 	id, err := s.r.Users.Create(ctx, u)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserExists) {
 			l.Warn("user already exists", zap.Error(err))
-			return 0, err
+			return 0, ErrUserExists
 		}
 		l.Error("failed to create user", zap.Error(err))
 		return 0, ErrInternal
@@ -61,7 +72,9 @@ func (s *UsersService) Update(ctx context.Context, u *models.User) error {
 
 	if err := u.Validate(); err != nil {
 		l.Warn("invalid user data", zap.Error(err))
-		return fmt.Errorf("validation failed: %w", err)
+		return ValidationError{
+			Msg: err.Error(),
+		}
 	}
 
 	if err := s.r.Users.Update(ctx, u); err != nil {
@@ -158,7 +171,7 @@ func (s *UsersService) Login(ctx context.Context, identifier, pswrd string) (str
 		return "", ErrInvalidCredentials
 	}
 
-	token, err := s.j.Generate(user.Username, user.ID)
+	token, err := s.j.Generate(user.Username, user.Id)
 	if err != nil {
 		l.Error("failed to generate JWT", zap.Error(err))
 		return "", ErrInternal
