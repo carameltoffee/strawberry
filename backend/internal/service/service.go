@@ -35,14 +35,14 @@ type Appointments interface {
 }
 
 type Deps struct {
-	r      *repository.Repository
-	jwtMgr jwt.JwtManager
-	hasher *hasher.Hasher
+	Repository *repository.Repository
+	JwtMgr     jwt.JwtManager
+	Hasher     *hasher.Hasher
 }
 
 func New(d *Deps) *Service {
 	return &Service{
-		Users:        newUsersService(d.r, d.jwtMgr, d.hasher),
-		Appointments: newAppointmentsService(d.r),
+		Users:        newUsersService(d.Repository, d.JwtMgr, d.Hasher),
+		Appointments: newAppointmentsService(d.Repository),
 	}
 }
