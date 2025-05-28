@@ -25,7 +25,7 @@ func (h *Handler) CreateAppointment(c *gin.Context) {
 		return
 	}
 
-	userId, exists := c.Get("userId")
+	userId, exists := c.Get(userCtxKey)
 	if !exists {
 		newErrorResponse(http.StatusUnauthorized, "unauthorized", c)
 		return
@@ -52,7 +52,7 @@ func (h *Handler) CreateAppointment(c *gin.Context) {
 }
 
 func (h *Handler) GetAppointments(c *gin.Context) {
-	userIdVal, exists := c.Get("userId")
+	userIdVal, exists := c.Get(userCtxKey)
 	if !exists {
 		newErrorResponse(http.StatusUnauthorized, "unauthorized", c)
 		return
@@ -130,7 +130,7 @@ func (h *Handler) DeleteAppointment(c *gin.Context) {
 		return
 	}
 
-	userId, exists := c.Get("userId")
+	userId, exists := c.Get(userCtxKey)
 	if !exists {
 		newErrorResponse(http.StatusUnauthorized, "unauthorized", c)
 		return
