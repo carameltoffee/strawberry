@@ -23,9 +23,15 @@ var (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading.env file")
+		log.Println("Warning: error loading .env file:", err)
 	}
-	var dbString = os.Getenv("DATABASE_URL")
+
+	dbString := os.Getenv("DATABASE_URL")
+	if dbString == "" {
+		dbString = buildDatabaseURLFromEnv()
+		log.Printf("Using constructed DATABASE_URL: %s\n", dbString)
+	}
+
 	flags.Usage = usage
 	flags.Parse(os.Args[1:])
 
@@ -41,7 +47,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Print(err.Error())
@@ -51,6 +56,29 @@ func main() {
 	if err := goose.RunContext(context.Background(), command, db, *dir, args[1:]...); err != nil {
 		log.Fatalf("migrate %v: %v", command, err)
 	}
+}
+
+func buildDatabaseURLFromEnv() string {
+	host := getEnvOrDefault("DB_HOST", "localhost")
+	port := getEnvOrDefault("DB_PORT", "5432")
+	user := getEnvOrDefault("DB_USER", "postgres")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := getEnvOrDefault("DB_NAME", "postgres")
+	sslmode := getEnvOrDefault("DB_SSLMODE", "disable")
+
+	if password != "" {
+		return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+			user, password, host, port, dbname, sslmode)
+	}
+	return fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=%s",
+		user, host, port, dbname, sslmode)
+}
+
+func getEnvOrDefault(key, def string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return def
 }
 
 func usage() {
