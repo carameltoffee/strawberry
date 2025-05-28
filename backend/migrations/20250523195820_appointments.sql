@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE appointments IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS appointments (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     master_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -13,5 +13,5 @@ CREATE TABLE appointments IF NOT EXISTS (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE appointments IF EXISTS;
+DROP TABLE IF EXISTS appointments;
 -- +goose StatementEnd
