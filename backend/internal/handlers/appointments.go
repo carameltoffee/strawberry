@@ -142,5 +142,5 @@ func (h *Handler) DeleteAppointment(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusNoContent, nil)
 }
