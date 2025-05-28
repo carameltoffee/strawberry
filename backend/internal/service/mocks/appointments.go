@@ -18,22 +18,27 @@ func (m *Appointments) Create(ctx context.Context, a *models.Appointment) (int64
 	return args.Get(0).(int64), args.Error(1)
 }
 
-func (m *Appointments) GetByUserId(ctx context.Context, userId int64) ([]models.Appointment, error) {
-	args := m.Called(ctx, userId)
+func (m *Appointments) Delete(ctx context.Context, id int64, userId int64) error {
+	args := m.Called(ctx, id, userId)
+	return args.Error(0)
+}
+
+func (m *Appointments) GetByUserId(ctx context.Context, id int64) ([]models.Appointment, error) {
+	args := m.Called(ctx, id)
 	return args.Get(0).([]models.Appointment), args.Error(1)
 }
 
-func (m *Appointments) GetByDate(ctx context.Context, userId int64, date time.Time) ([]models.Appointment, error) {
-	args := m.Called(ctx, userId, date)
+func (m *Appointments) GetByMasterId(ctx context.Context, id int64) ([]models.Appointment, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).([]models.Appointment), args.Error(1)
+}
+
+func (m *Appointments) GetByDate(ctx context.Context, id int64, date time.Time) ([]models.Appointment, error) {
+	args := m.Called(ctx, id, date)
 	return args.Get(0).([]models.Appointment), args.Error(1)
 }
 
 func (m *Appointments) GetByStatus(ctx context.Context, status string) ([]models.Appointment, error) {
 	args := m.Called(ctx, status)
 	return args.Get(0).([]models.Appointment), args.Error(1)
-}
-
-func (m *Appointments) Delete(ctx context.Context, id, userId int64) error {
-	args := m.Called(ctx, id, userId)
-	return args.Error(0)
 }
