@@ -39,13 +39,16 @@ func main() {
 	}
 	defer pool.Close()
 
+	jwtMgr := jwt.NewJwtManagerKeyTTL(cfg.Jwt.SecretKey, cfg.Jwt.TTL)
+
 	repo := repository.New(pool)
 	svc := service.New(&service.Deps{
 		Repository: repo,
-		JwtMgr:     jwt.NewJwtManagerKeyTTL(cfg.Jwt.SecretKey, cfg.Jwt.TTL),
+		JwtMgr:     jwtMgr,
 		Hasher:     hasher.New(),
 	})
-	h := handlers.New(svc)
+
+	h := handlers.New(svc, jwtMgr)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.App.Port),
