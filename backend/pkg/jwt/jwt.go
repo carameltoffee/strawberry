@@ -14,7 +14,7 @@ var (
 
 type JwtManager interface {
 	Generate(username string, id int64) (string, error)
-	Verify(token string) (*jwt.MapClaims, error)
+	Verify(token string) (*CustomClaims, error)
 }
 
 type JwtManagerKeyTTL struct {

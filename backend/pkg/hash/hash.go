@@ -11,7 +11,7 @@ type Hasher struct {
 	pool sync.Pool
 }
 
-func NewHasher() *Hasher {
+func New() *Hasher {
 	return &Hasher{
 		pool: sync.Pool{
 			New: func() interface{} {
