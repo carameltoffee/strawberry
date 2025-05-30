@@ -8,10 +8,10 @@ import (
 )
 
 type User struct {
-	Id             int64  `json:"id"`
-	FullName       string `json:"full_name"`
-	Username       string `json:"username"`
-	Password       string
+	Id             int64     `json:"id"`
+	FullName       string    `json:"full_name"`
+	Username       string    `json:"username"`
+	Password       string    `json:"-"`
 	RegisteredAt   time.Time `json:"registered_at"`
 	AverageRating  float64   `json:"average_rating"`
 	Specialization string    `json:"specialization"`
