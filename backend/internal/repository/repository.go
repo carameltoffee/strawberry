@@ -27,6 +27,7 @@ type Users interface {
 type Appointments interface {
 	Create(ctx context.Context, a *models.Appointment) (int64, error)
 	Delete(ctx context.Context, id int64) error
+	GetById(ctx context.Context, id int64) (*models.Appointment, error)
 	GetByUserId(ctx context.Context, id int64) ([]models.Appointment, error)
 	GetByMasterId(ctx context.Context, id int64) ([]models.Appointment, error)
 	GetByDate(ctx context.Context, id int64, date time.Time) ([]models.Appointment, error)

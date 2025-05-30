@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -144,4 +145,28 @@ func (r *postgresAppointmentsRepository) GetByStatus(ctx context.Context, status
 		return nil, ErrNoAppointments
 	}
 	return apts, nil
+}
+
+func (r *postgresAppointmentsRepository) GetById(ctx context.Context, id int64) (*models.Appointment, error) {
+	query := `
+		SELECT id, user_id, master_id, scheduled_at, created_at, status
+		FROM appointments
+		WHERE id = $1;
+	`
+	var a models.Appointment
+	err := r.db.QueryRow(ctx, query, id).Scan(
+		&a.ID,
+		&a.UserID,
+		&a.MasterID,
+		&a.ScheduledAt,
+		&a.CreatedAt,
+		&a.Status,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNoAppointments
+		}
+		return nil, err
+	}
+	return &a, nil
 }
