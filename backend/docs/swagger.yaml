@@ -1,0 +1,284 @@
+basePath: /api
+definitions:
+  handlers.AppointmentReq:
+    properties:
+      master_id:
+        type: integer
+      time:
+        type: string
+    type: object
+  handlers.AppointmentRes:
+    properties:
+      id:
+        type: integer
+    type: object
+  handlers.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handlers.LoginReq:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  handlers.LoginRes:
+    properties:
+      token:
+        type: string
+    type: object
+  handlers.RegisterReq:
+    properties:
+      full_name:
+        type: string
+      password:
+        type: string
+      specialization:
+        type: string
+      username:
+        type: string
+    type: object
+  handlers.RegisterRes:
+    properties:
+      id:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      average_rating:
+        type: number
+      full_name:
+        type: string
+      id:
+        type: integer
+      registered_at:
+        type: string
+      specialization:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Appointment booking system
+  title: Strawberry API
+  version: "1.0"
+paths:
+  /appointments:
+    post:
+      consumes:
+      - application/json
+      description: Create a new appointment for the authenticated user
+      parameters:
+      - description: appointment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AppointmentReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.AppointmentRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new appointment
+      tags:
+      - appointments
+  /appointments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an appointment by ID if it belongs to the user
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete an appointment
+      tags:
+      - appointments
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return a JWT token
+      parameters:
+      - description: login credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Login user
+      tags:
+      - auth
+  /masters:
+    get:
+      consumes:
+      - application/json
+      description: Get masters filtered by specialization and/or minimum average rating
+      parameters:
+      - description: Filter by specialization
+        in: query
+        name: specialization
+        type: string
+      - description: Filter by minimum average rating
+        in: query
+        name: min_rating
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get list of masters
+      tags:
+      - masters
+  /masters/{username}:
+    get:
+      consumes:
+      - application/json
+      description: Fetch a master's profile using their username
+      parameters:
+      - description: Master's username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get master by username
+      tags:
+      - masters
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user or master account
+      parameters:
+      - description: registration data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.RegisterRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Register a new user or master
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
