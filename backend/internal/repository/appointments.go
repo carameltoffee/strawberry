@@ -22,13 +22,34 @@ func newPostgresAppointmentsRepository(db *pgxpool.Pool) Appointments {
 }
 
 func (r *postgresAppointmentsRepository) Create(ctx context.Context, a *models.Appointment) (int64, error) {
+	dayOfWeek := a.ScheduledAt.Weekday().String()
+	timeOfDay := a.ScheduledAt.Format("15:04:05")
+
+	const availabilityQuery = `
+		SELECT COUNT(*) 
+		FROM schedules 
+		WHERE user_id = $1
+		  AND LOWER(day_of_week) = LOWER($2)
+		  AND $3::time BETWEEN time_start AND time_end
+		  AND is_day_off = false;
+	`
+
+	var count int
+	err := r.db.QueryRow(ctx, availabilityQuery, a.MasterID, dayOfWeek, timeOfDay).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	if count == 0 {
+		return 0, ErrMasterUnavailable
+	}
+
 	query := `
 		INSERT INTO appointments (user_id, master_id, scheduled_at, status)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id;
 	`
 	var id int64
-	err := r.db.QueryRow(ctx, query, a.UserID, a.MasterID, a.ScheduledAt, a.Status).Scan(&id)
+	err = r.db.QueryRow(ctx, query, a.UserID, a.MasterID, a.ScheduledAt, a.Status).Scan(&id)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {

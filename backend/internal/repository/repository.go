@@ -11,6 +11,12 @@ import (
 type Repository struct {
 	Users
 	Appointments
+	Schedules
+}
+
+type Schedules interface {
+	SetDayOff(ctx context.Context, userId int64, dayOfWeek string, isDayOff bool) error
+	UpdateWorkingHours(ctx context.Context, userId int64, dayOfWeek string, timeStart, timeEnd string) error
 }
 
 type Users interface {
@@ -38,5 +44,6 @@ func New(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		Users:        newPostgresUsersRepository(db),
 		Appointments: newPostgresAppointmentsRepository(db),
+		Schedules:    newPostgresSchedulesRepository(db),
 	}
 }
