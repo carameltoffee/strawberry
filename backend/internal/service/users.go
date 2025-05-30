@@ -54,6 +54,8 @@ func (s *UsersService) Create(ctx context.Context, u *models.User) (int64, error
 		}
 	}
 
+	u.Password = s.h.HashString(u.Password)
+
 	id, err := s.r.Users.Create(ctx, u)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserExists) {
