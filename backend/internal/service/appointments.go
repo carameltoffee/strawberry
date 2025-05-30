@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strawberry/internal/models"
 	"strawberry/internal/repository"
 	"strawberry/pkg/logger"
@@ -34,7 +33,7 @@ func (s *AppointmentsService) Create(ctx context.Context, a *models.Appointment)
 
 	if err := a.Validate(); err != nil {
 		l.Warn("invalid appointment data", zap.Error(err))
-		return 0, fmt.Errorf("%w: %v", ErrInvalidAppointment, err)
+		return 0, ValidationError{Msg: err.Error()}
 	}
 
 	id, err := s.r.Appointments.Create(ctx, a)
@@ -53,11 +52,21 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
 
-	if id != userId {
+	a, err := s.r.Appointments.GetById(ctx, id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNoAppointments) {
+			l.Warn("appointment not found", zap.Int64("id", id))
+			return ErrAppointmentNotFound
+		}
+		l.Error("failed to get appointment", zap.Error(err))
+	}
+
+	if a.UserID != userId {
+		l.Warn("unauthorized", zap.Int64("user_id", userId))
 		return ErrUnauthorized
 	}
 
-	err := s.r.Appointments.Delete(ctx, id)
+	err = s.r.Appointments.Delete(ctx, id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNoAppointments) {
 			l.Warn("appointment not found", zap.Int64("id", id))
