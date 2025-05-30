@@ -20,6 +20,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// @title Strawberry API
+// @version 1.0
+// @description Appointment booking system
+// @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	ctx := logger.WithLogger(context.Background())
 	log := logger.FromContext(ctx)
