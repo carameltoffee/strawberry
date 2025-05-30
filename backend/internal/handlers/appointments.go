@@ -27,6 +27,7 @@ type AppointmentRes struct {
 // @Produce json
 // @Param input body AppointmentReq true "appointment info"
 // @Success 201 {object} AppointmentRes
+// @Failure 409 {object} ErrorResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -58,6 +59,10 @@ func (h *Handler) CreateAppointment(c *gin.Context) {
 		Status:      "pending",
 	})
 	if err != nil {
+		if errors.Is(err, service.ErrMasterUnavaliable) {
+			newErrorResponse(http.StatusConflict, "master unavaliable", c)
+			return
+		}
 		var valErr service.ValidationError
 		if errors.As(err, &valErr) {
 			newErrorResponse(http.StatusBadRequest, valErr.Msg, c)
@@ -184,7 +189,7 @@ func (h *Handler) DeleteAppointment(c *gin.Context) {
 
 	err = h.s.Appointments.Delete(c.Request.Context(), id, claims.Id)
 	if err != nil {
-		if errors.Is(err, service.ErrAppointmentConflict){
+		if errors.Is(err, service.ErrAppointmentConflict) {
 			newErrorResponse(http.StatusConflict, "appointment with this time already exists", c)
 			return
 		}

@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	_ "strawberry/docs"
 	"strawberry/internal/service"
 	"strawberry/pkg/jwt"
-	_ "strawberry/docs"
+
+	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/gin-gonic/gin"
 )
 
 const userCtxKey = "userId"
@@ -29,7 +30,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	api := r.Group("api")
 	{
 
-
 		api.POST("/register", h.Register)
 		api.POST("/login", h.Login)
 
@@ -42,6 +42,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			auth.GET("/appointments", h.GetAppointments)
 			auth.POST("/appointments", h.CreateAppointment)
 			auth.DELETE("/appointments/:id", h.DeleteAppointment)
+
+			auth.PUT("/schedule/dayoff", h.SetDayOff)
+			auth.PUT("/schedule/hours", h.SetWorkingHours)
 		}
 	}
 	return r
