@@ -12,6 +12,12 @@ import (
 type Service struct {
 	Users
 	Appointments
+	Schedules
+}
+
+type Schedules interface {
+	SetDayOff(ctx context.Context, userID int64, dayOfWeek string, isDayOff bool) error
+	UpdateWorkingHours(ctx context.Context, userID int64, dayOfWeek, timeStart, timeEnd string) error
 }
 
 type Users interface {
@@ -44,5 +50,6 @@ func New(d *Deps) *Service {
 	return &Service{
 		Users:        newUsersService(d.Repository, d.JwtMgr, d.Hasher),
 		Appointments: newAppointmentsService(d.Repository),
+		Schedules:    newSchedulesService(d.Repository),
 	}
 }

@@ -25,6 +25,7 @@ var (
 	ErrAppointmentNotFound = errors.New("appointment not found")
 	ErrAppointmentConflict = errors.New("appointment conflict")
 	ErrInvalidAppointment  = errors.New("invalid appointment data")
+	ErrMasterUnavaliable   = errors.New("master unavaliable")
 )
 
 func (s *AppointmentsService) Create(ctx context.Context, a *models.Appointment) (int64, error) {
@@ -41,6 +42,9 @@ func (s *AppointmentsService) Create(ctx context.Context, a *models.Appointment)
 		if errors.Is(err, repository.ErrAppointmentConflict) {
 			l.Warn("appointment conflict", zap.Error(err))
 			return 0, ErrAppointmentConflict
+		}
+		if errors.Is(err, repository.ErrMasterUnavailable) {
+			return 0, ErrMasterUnavaliable
 		}
 		l.Error("failed to create appointment", zap.Error(err))
 		return 0, ErrInternal
