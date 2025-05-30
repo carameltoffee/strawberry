@@ -20,6 +20,17 @@ type RegisterRes struct {
 	Id int64 `json:"id"`
 }
 
+// @Summary Register a new user or master
+// @Description Create a new user or master account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body RegisterReq true "registration data"
+// @Success 201 {object} RegisterRes
+// @Failure 400 {object} ErrorResponse
+// @Failure 409 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /register [post]
 func (h *Handler) Register(c *gin.Context) {
 	var data *RegisterReq
 	if err := c.ShouldBindBodyWithJSON(&data); err != nil {
@@ -47,7 +58,7 @@ func (h *Handler) Register(c *gin.Context) {
 			newErrorResponse(http.StatusConflict, "user already exists", c)
 			return
 		}
-		var valErr *service.ValidationError
+		var valErr service.ValidationError
 		if errors.As(err, &valErr) {
 			newErrorResponse(http.StatusBadRequest, valErr.Msg, c)
 			return
@@ -69,6 +80,17 @@ type LoginRes struct {
 	Token string `json:"token"`
 }
 
+// @Summary Login user
+// @Description Authenticate user and return a JWT token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body LoginReq true "login credentials"
+// @Success 200 {object} LoginRes
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var data *LoginReq
 	if err := c.ShouldBindJSON(&data); err != nil {

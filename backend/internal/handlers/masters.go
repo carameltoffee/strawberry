@@ -15,6 +15,17 @@ type MasterFilter struct {
 	MinRating      float64 `form:"min_rating"`
 }
 
+// @Summary Get list of masters
+// @Description Get masters filtered by specialization and/or minimum average rating
+// @Tags masters
+// @Accept json
+// @Produce json
+// @Param specialization query string false "Filter by specialization"
+// @Param min_rating query number false "Filter by minimum average rating"
+// @Success 200 {array} models.User
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /masters [get]
 func (h *Handler) GetMasters(c *gin.Context) {
 	specialization := c.Query("specialization")
 	minRatingStr := c.Query("min_rating")
@@ -80,6 +91,17 @@ func (h *Handler) GetMasters(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary Get master by username
+// @Description Fetch a master's profile using their username
+// @Tags masters
+// @Accept json
+// @Produce json
+// @Param username path string true "Master's username"
+// @Success 200 {object} models.User
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /masters/{username} [get]
 func (h *Handler) GetMasterByUsername(c *gin.Context) {
 	usernameStr := c.Param("username")
 
