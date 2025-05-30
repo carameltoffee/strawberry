@@ -45,6 +45,28 @@ definitions:
       id:
         type: integer
     type: object
+  handlers.setDayOffInput:
+    properties:
+      day_of_week:
+        type: string
+      is_day_off:
+        type: boolean
+    required:
+    - day_of_week
+    type: object
+  handlers.setWorkingHoursInput:
+    properties:
+      day_of_week:
+        type: string
+      time_end:
+        type: string
+      time_start:
+        type: string
+    required:
+    - day_of_week
+    - time_end
+    - time_start
+    type: object
   models.User:
     properties:
       average_rating:
@@ -91,6 +113,10 @@ paths:
             $ref: '#/definitions/handlers.ErrorResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
         "500":
@@ -276,6 +302,74 @@ paths:
       summary: Register a new user or master
       tags:
       - auth
+  /schedule/dayoff:
+    put:
+      consumes:
+      - application/json
+      description: Mark/unmark a day of week as day off
+      parameters:
+      - description: Day off input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.setDayOffInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Set day off for master
+      tags:
+      - schedule
+  /schedule/hours:
+    put:
+      consumes:
+      - application/json
+      description: Update working hours for a day of week
+      parameters:
+      - description: Working hours input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.setWorkingHoursInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Set working hours for master
+      tags:
+      - schedule
 securityDefinitions:
   BearerAuth:
     in: header
