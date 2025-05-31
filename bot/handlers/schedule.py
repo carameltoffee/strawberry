@@ -1,22 +1,34 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from datetime import date
-from utils.data_store import user_schedules, user_work_hours
+from api.api_client import StrawberryAPIClient
+from bot.db.db import store  
 from keyboards.main_menu import main_menu
 
 schedule_router = Router()
+api = StrawberryAPIClient(base_url="http://localhost:8000/api")
 
 @schedule_router.message(F.text == "Показать расписание")
 async def cmd_show_schedule(message: Message):
     user_id = message.from_user.id
+    token = store.get_user_token(user_id)  
+    if not token:
+        await message.answer("❌ Вы не авторизованы. Введите /login.")
+        return
+    
     today = date.today()
 
-    weekends = user_schedules.get(user_id, [])
-    work_hours = user_work_hours.get(user_id, [])
+    schedule = await api.get_schedule(token)
+    if schedule is None:
+        await message.answer("❌ Не удалось получить расписание. Попробуйте позже.", reply_markup=main_menu)
+        return
+
+    weekends = [date.fromisoformat(d) for d in schedule.get("weekends", [])]
+    work_hours = [d for d in schedule.get("work_hours", [])]
 
     upcoming = sorted(d for d in weekends if d >= today)
     weekend_text = "\n".join(map(str, upcoming)) if upcoming else "— нет будущих выходных"
-    hours_text = "\n".join(t.strftime("%H:%M") for t in work_hours) if work_hours else "— не указаны"
+    hours_text = "\n".join(work_hours) if work_hours else "— не указаны"
 
     if today in weekends:
         status = "📛 Сегодня выходной — приёма нет."
