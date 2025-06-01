@@ -1,5 +1,5 @@
 import aiohttp
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 class StrawberryAPIClient:
     def __init__(self, base_url: str):
@@ -31,31 +31,34 @@ class StrawberryAPIClient:
             data = await resp.json()
             return data['token']
 
-    async def set_day_off(self, day_of_week: str, is_day_off: bool, token: str) -> bool:
+    async def set_day_off_by_date(self, date: str, is_day_off: bool, token: str) -> bool:
         await self.start()
         url = f"{self.base_url}/schedule/dayoff"
-        payload = {"day_of_week": day_of_week, "is_day_off": is_day_off}
+        payload = {
+            "date": date, 
+            "is_day_off": is_day_off
+        }
         async with self.session.put(url, json=payload, headers=self._headers(token)) as resp:
             resp.raise_for_status()
             return resp.status == 200
 
-    async def set_work_hours(self, start: str, end: str, week: str, token: str) -> bool:
+    async def set_working_slots(self, day_of_week: str, slots: List[str], token: str) -> bool:
         await self.start()
         url = f"{self.base_url}/schedule/hours"
         payload = {
-             "time_start": start, 
-             "time_end": end,
-             "day_of_week": week
-             }
+            "day_of_week": day_of_week,
+            "slots": slots
+        }
         async with self.session.put(url, json=payload, headers=self._headers(token)) as resp:
             resp.raise_for_status()
             return resp.status == 200
 
-    async def get_schedule(self, token: str) -> Optional[Dict[str, Any]]:
+    async def get_today_schedule(self, token: str) -> Optional[Dict[str, Any]]:
         await self.start()
-        url = f"{self.base_url}/schedule"
-        async with self.session.get(url, headers=self._headers(token)) as resp:
-            if resp.status != 200:
-                return None
-            return await resp.json()
+        url = f"{self.base_url}/schedule/today" 
+        headers = self._headers(token)
+        
+        async with self.session.get(url, headers=headers) as resp:
+            if resp.status == 200:
+                return await resp.json()
 
