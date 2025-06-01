@@ -16,8 +16,9 @@ type Service struct {
 }
 
 type Schedules interface {
-	SetDayOff(ctx context.Context, userID int64, dayOfWeek string, isDayOff bool) error
-	UpdateWorkingHours(ctx context.Context, userID int64, dayOfWeek, timeStart, timeEnd string) error
+	SetDayOff(ctx context.Context, userId int64, date string, isDayOff bool) error
+	SetWorkingSlots(ctx context.Context, userId int64, dayOfWeek string, slots []string) error
+	GetTodaySchedule(ctx context.Context, userID int64) (*models.TodaySchedule, error)
 }
 
 type Users interface {
