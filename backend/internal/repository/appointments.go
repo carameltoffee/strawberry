@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgerrcode"
@@ -22,24 +23,31 @@ func newPostgresAppointmentsRepository(db *pgxpool.Pool) Appointments {
 }
 
 func (r *postgresAppointmentsRepository) Create(ctx context.Context, a *models.Appointment) (int64, error) {
-	dayOfWeek := a.ScheduledAt.Weekday().String()
+	dayOfWeek := strings.ToLower(a.ScheduledAt.Weekday().String())
 	timeOfDay := a.ScheduledAt.Format("15:04:05")
+	date := a.ScheduledAt.Format("2006-01-02")
 
-	const availabilityQuery = `
-		SELECT COUNT(*) 
-		FROM schedules 
-		WHERE user_id = $1
-		  AND LOWER(day_of_week) = LOWER($2)
-		  AND $3::time BETWEEN time_start AND time_end
-		  AND is_day_off = false;
-	`
-
-	var count int
-	err := r.db.QueryRow(ctx, availabilityQuery, a.MasterID, dayOfWeek, timeOfDay).Scan(&count)
+	var offCount int
+	err := r.db.QueryRow(ctx,
+		`SELECT COUNT(*) FROM days_off_dates WHERE user_id = $1 AND date = $2`,
+		a.MasterID, date,
+	).Scan(&offCount)
 	if err != nil {
 		return 0, err
 	}
-	if count == 0 {
+	if offCount > 0 {
+		return 0, ErrMasterUnavailable
+	}
+
+	var slotCount int
+	err = r.db.QueryRow(ctx,
+		`SELECT COUNT(*) FROM schedule_slots WHERE user_id = $1 AND day_of_week = $2 AND slot = $3`,
+		a.MasterID, dayOfWeek, timeOfDay,
+	).Scan(&slotCount)
+	if err != nil {
+		return 0, err
+	}
+	if slotCount == 0 {
 		return 0, ErrMasterUnavailable
 	}
 

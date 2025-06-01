@@ -15,8 +15,10 @@ type Repository struct {
 }
 
 type Schedules interface {
-	SetDayOff(ctx context.Context, userId int64, dayOfWeek string, isDayOff bool) error
-	UpdateWorkingHours(ctx context.Context, userId int64, dayOfWeek string, timeStart, timeEnd string) error
+	SetDayOff(ctx context.Context, userID int64, date time.Time, isDayOff bool) error
+	SetWorkingSlots(ctx context.Context, userID int64, dayOfWeek string, slots []string) error
+	GetDaysOff(ctx context.Context, userId int64) ([]time.Time, error)
+	GetSlotsByDay(ctx context.Context, userId int64, dayOfWeek string) ([]time.Time, error)
 }
 
 type Users interface {
