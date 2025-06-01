@@ -13,7 +13,7 @@ class LoginStates(StatesGroup):
 def create_start_router(api_client: StrawberryAPIClient) -> Router:
     start_router = Router()
 
-    @start_router.message(F.text == "/start")
+    @start_router.message(F.text.in_({"/start", "/login"}))
     async def login_start(message: Message, state: FSMContext):
         await state.set_state(LoginStates.waiting_for_username)
         await message.answer("Введите ваш логин:")

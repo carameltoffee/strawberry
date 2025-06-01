@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from api.api_client import StrawberryAPIClient
 from states.states import States
-from logic.logic import parse_times
+from utils.utils import parse_times
 from db.db import store
 
 def create_work_hours_router(api_client: StrawberryAPIClient) -> Router:
@@ -11,7 +11,7 @@ def create_work_hours_router(api_client: StrawberryAPIClient) -> Router:
 
     @router.message(F.text == "Установить часы приёма")
     async def cmd_set_work_hours(message: Message, state: FSMContext):
-        await message.answer("Введите часы приёма (например: 10:00 14:30):")
+        await message.answer("📆 Введите день недели и часы приёма (например: Понедельник 10:00 14:30 16:00):")
         await state.set_state(States.set_work_hours)
 
     @router.message(States.set_work_hours)
@@ -24,8 +24,8 @@ def create_work_hours_router(api_client: StrawberryAPIClient) -> Router:
             return
 
         parts = message.text.strip().split()
-        if len(parts) < 3:
-            await message.answer("⚠️ Укажите день недели и два времени: начало и конец приёма. Пример:\nПонедельник 10:00 14:30")
+        if len(parts) < 2:
+            await message.answer("⚠️ Укажите день недели и хотя бы одно время. Пример:\nПонедельник 10:00 14:30 16:00")
             return
 
         weekday_rus = parts[0].lower()
@@ -50,24 +50,26 @@ def create_work_hours_router(api_client: StrawberryAPIClient) -> Router:
             await message.answer(f"⚠️ Неверный формат времени: {', '.join(invalid)}")
             return
 
-        if len(valid) != 2:
-            await message.answer("⚠️ Укажите два времени: начало и конец приёма.")
+        if not valid:
+            await message.answer("⚠️ Укажите хотя бы одно корректное время.")
             return
 
-        start_time, end_time = sorted(valid)
-        ok = await api_client.set_work_hours(
-            start=start_time.strftime("%H:%M"),
-            end=end_time.strftime("%H:%M"),
-            week=weekday_eng,
+        slots = sorted(t.strftime("%H:%M") for t in valid)
+
+        ok = await api_client.set_working_slots(
+            day_of_week=weekday_eng,
+            slots=slots,
             token=token
         )
 
         if ok:
-            await message.answer(f"✅ Часы приёма на {weekday_rus} установлены:\n{start_time.strftime('%H:%M')} — {end_time.strftime('%H:%M')}")
+            await message.answer(
+                f"✅ Часы приёма на {weekday_rus} установлены:\n" +
+                "\n".join(slots)
+            )
         else:
             await message.answer("❌ Не удалось установить часы приёма.")
 
         await state.clear()
-
 
     return router
