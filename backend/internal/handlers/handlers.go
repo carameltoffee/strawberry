@@ -46,7 +46,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 			auth.PUT("/schedule/dayoff", h.SetDayOff)
 			auth.PUT("/schedule/hours", h.SetWorkingHours)
-			auth.GET("schedule/today", h.GetTodaySchedule)
+			auth.GET("schedule/:id", h.GetSchedule)
 		}
 	}
 	return r

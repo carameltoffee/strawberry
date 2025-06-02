@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -97,27 +98,30 @@ func (h *Handler) SetWorkingHours(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// GetTodaySchedule возвращает расписание на сегодня для текущего пользователя
+// GetSchedule возвращает расписание на сегодня для текущего пользователя
 // @Summary      Get today's schedule
 // @Description  Get working schedule slots for the current user for today
+// @Param date query string true "date"
+// @Param date path int true "user's id"
 // @Tags         schedule
 // @Security     BearerAuth
 // @Produce      json
 // @Success      200  {object} models.TodaySchedule  "Today's schedule"
 // @Failure      401  {object} ErrorResponse
 // @Failure      500  {object} ErrorResponse
-// @Router       /schedule/today [get]
-func (h *Handler) GetTodaySchedule(c *gin.Context) {
-	claims, ok := getClaims(c)
-	if !ok {
-		newErrorResponse(http.StatusUnauthorized, "unauthorized", c)
+// @Router       /schedule/{id}/today [get]
+func (h *Handler) GetSchedule(c *gin.Context) {
+	ctx := c.Request.Context()
+	userIdStr := c.Param("id")
+	date := c.Query("date")
+
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		newErrorResponse(http.StatusBadRequest, "invalid id", c)
 		return
 	}
 
-	ctx := c.Request.Context()
-	userId := claims.Id
-
-	schedule, err := h.s.Schedules.GetTodaySchedule(ctx, userId)
+	schedule, err := h.s.Schedules.GetSchedule(ctx, date, userId)
 	if err != nil {
 		newErrorResponse(http.StatusInternalServerError, "failed to get working slots", c)
 		return

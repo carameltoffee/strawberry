@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strawberry/internal/models"
 	"strawberry/internal/repository"
@@ -10,6 +11,10 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+)
+
+var (
+	ErrBadDate = errors.New("bad date")
 )
 
 type SchedulesService struct {
@@ -71,12 +76,15 @@ func (s *SchedulesService) SetWorkingSlots(ctx context.Context, userId int64, da
 	return nil
 }
 
-func (s *SchedulesService) GetTodaySchedule(ctx context.Context, userId int64) (*models.TodaySchedule, error) {
+func (s *SchedulesService) GetSchedule(ctx context.Context, date string, userId int64) (*models.TodaySchedule, error) {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
 
-	today := time.Now().UTC()
-	dayOfWeek := strings.ToLower(today.Weekday().String())
+	day, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return nil, ErrBadDate
+	}
+	dayOfWeek := strings.ToLower(day.Weekday().String())
 
 	l.Info("Getting days off",
 		zap.Int64("user_id", userId),
@@ -116,14 +124,14 @@ func (s *SchedulesService) GetTodaySchedule(ctx context.Context, userId int64) (
 
 	l.Info("Getting appointments by date",
 		zap.Int64("user_id", userId),
-		zap.String("date", today.Format("2006-01-02")),
+		zap.String("date", day.Format("2006-01-02")),
 	)
 
-	appointments, err := s.repo.Appointments.GetByDate(ctx, userId, today)
+	appointments, err := s.repo.Appointments.GetByDate(ctx, userId, day)
 	if err != nil {
 		l.Error("Failed to get appointments by date",
 			zap.Int64("user_id", userId),
-			zap.String("date", today.Format("2006-01-02")),
+			zap.String("date", day.Format("2006-01-02")),
 			zap.Error(err),
 		)
 	}
