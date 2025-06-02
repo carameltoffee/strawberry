@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = "http://localhost:8080/api";
 
 export interface ErrorResponse {
      error: string;
@@ -43,37 +43,53 @@ export interface User {
 }
 
 export interface SetDayOffInput {
-     day_of_week: string;
+     date: string;        
      is_day_off?: boolean;
 }
 
-export interface SetWorkingHoursInput {
-     day_of_week: string;
-     time_start: string;
-     time_end: string;
+export interface SetWorkingSlotsInput {
+     day_of_week: string;  
+     slots: string[];     
 }
 
-function request<T>(
+async function request<T>(
      method: string,
      path: string,
      token?: string,
      body?: any
 ): Promise<T> {
-     return fetch(`${API_BASE}${path}`, {
+     const res = await fetch(`${API_BASE}${path}`, {
           method,
           headers: {
                "Content-Type": "application/json",
                ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: body ? JSON.stringify(body) : undefined,
-     }).then(async (res) => {
-          if (!res.ok) {
-               const err: ErrorResponse = await res.json();
-               throw new Error(err.error || res.statusText);
-          }
-          return res.status === 204 ? ("" as any) : res.json();
      });
+
+     if (!res.ok) {
+          let errText = res.statusText;
+          try {
+               const errData = await res.json();
+               if (errData?.error) errText = errData.error;
+          } catch {
+          }
+          throw new Error(errText);
+     }
+
+     const contentLength = res.headers.get("Content-Length");
+
+     if (res.status === 204 || !contentLength || contentLength === "0") {
+          return undefined as unknown as T;
+     }
+
+     try {
+          return await res.json();
+     } catch {
+          return undefined as unknown as T;
+     }
 }
+
 
 export const api = {
      login(input: LoginReq): Promise<LoginRes> {
@@ -107,7 +123,7 @@ export const api = {
           return request("PUT", "/schedule/dayoff", token, input);
      },
 
-     setWorkingHours(token: string, input: SetWorkingHoursInput): Promise<void> {
+     setWorkingHours(token: string, input: SetWorkingSlotsInput): Promise<void> {
           return request("PUT", "/schedule/hours", token, input);
      },
 };
