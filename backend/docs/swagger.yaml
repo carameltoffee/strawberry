@@ -317,6 +317,35 @@ paths:
       summary: Register a new user or master
       tags:
       - auth
+  /schedule/{id}/today:
+    get:
+      description: Get working schedule slots for the current user for today
+      parameters:
+      - description: user's id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Today's schedule
+          schema:
+            $ref: '#/definitions/models.TodaySchedule'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get today's schedule
+      tags:
+      - schedule
   /schedule/dayoff:
     put:
       consumes:
@@ -383,29 +412,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Set working slots for master
-      tags:
-      - schedule
-  /schedule/today:
-    get:
-      description: Get working schedule slots for the current user for today
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Today's schedule
-          schema:
-            $ref: '#/definitions/models.TodaySchedule'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get today's schedule
       tags:
       - schedule
 securityDefinitions:

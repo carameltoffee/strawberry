@@ -453,7 +453,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/schedule/today": {
+        "/schedule/{id}/today": {
             "get": {
                 "security": [
                     {
@@ -468,6 +468,15 @@ const docTemplate = `{
                     "schedule"
                 ],
                 "summary": "Get today's schedule",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user's id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Today's schedule",
