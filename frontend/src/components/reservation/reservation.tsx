@@ -1,17 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import styles from './reservation.module.css';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import styles from "./reservation.module.css";
+import { api } from "../../api/api_client";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 const Reservation: React.FC = () => {
+     const { id } = useParams<{ id: string }>();
+     const masterId = id ? Number(id) : NaN;
+
      const [date, setDate] = useState<Date | null>(new Date());
-     const [secretCode, setSecretCode] = useState<string>('');
+     const [secretCode, setSecretCode] = useState<string>("");
      const [isCodeValid, setIsCodeValid] = useState<boolean | null>(null);
      const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-     const [availableTimesData, setAvailableTimesData] = useState<{ [key: string]: string[] }>({});
+     const [loadingTimes, setLoadingTimes] = useState(false);
+     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+     if (!id || isNaN(masterId)) {
+          return <div>Ошибка: неверный или отсутствующий мастер ID в URL</div>;
+     }
 
      const handleDateChange = (newDate: Value) => {
           if (Array.isArray(newDate)) {
@@ -25,66 +35,75 @@ const Reservation: React.FC = () => {
           setSecretCode(event.target.value);
      };
 
-     const handleSubmit = (event: React.FormEvent) => {
+     const handleSubmit = async (event: React.FormEvent) => {
           event.preventDefault();
-          const isValid = secretCode === '12345';
-          setIsCodeValid(isValid);
+          if (!token) return alert("Please log in first");
+
+          try {
+               await api.deleteAppointment(token, Number(secretCode));
+               setIsCodeValid(true);
+          } catch (err) {
+               setIsCodeValid(false);
+          }
      };
 
-     useEffect(() => {
-          const mockTimes: { [key: string]: string[] } = {
-               '2025-05-11': ['10:00', '11:00', '14:00'],
-               '2025-05-12': ['09:00', '13:00', '15:30'],
-               '2025-05-13': ['12:00'],
-               '2025-05-14': [],
-               '2025-05-15': ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00'],
-               '2025-05-16': ['10:00'],
-               '2025-05-17': [],
-               '2025-05-18': ['09:00', '10:00'],
-          };
-          setAvailableTimesData(mockTimes);
-     }, []);
-
-     useEffect(() => {
+     const handleBookTime = async (time: string) => {
+          if (!token) return alert("Please log in first");
           if (!date) return;
 
-          const dateStr = date.toISOString().split('T')[0];
-          const times = availableTimesData[dateStr] || [];
-          setAvailableTimes(times);
-     }, [date, availableTimesData]);
+          const dateStr = date.toISOString().split("T")[0];
+          const datetime = `${dateStr}T${time}`;
 
-     const getTileClass = ({ date, view }: { date: Date; view: string }) => {
-          if (view !== 'month') return '';
-          const dateStr = date.toISOString().split('T')[0];
-          const times = availableTimesData[dateStr] || [];
-
-          const freeSlots = times.length;
-
-          if (freeSlots === 0) return styles.disabledDay;
-          if (freeSlots <= 1) return styles.fullLoad;
-          if (freeSlots <= 2) return styles.highLoad;
-          if (freeSlots <= 4) return styles.mediumLoad;
-          return styles.lowLoad;
+          try {
+               const res = await api.createAppointment(token, {
+                    master_id: masterId,
+                    time: datetime,
+               });
+               alert("Appointment created. ID: " + res.id);
+          } catch (err: any) {
+               alert("Failed to book: " + err.message);
+          }
      };
+
+     // Uncomment and update useEffect if needed
+     /*
+     useEffect(() => {
+       const fetchTimes = async () => {
+         if (!date) return;
+         setLoadingTimes(true);
+         const dateStr = date.toISOString().split("T")[0];
+   
+         try {
+           const times = await api.getAvailableTimes(masterId, dateStr);
+           setAvailableTimes(times);
+         } catch (err) {
+           setAvailableTimes([]);
+         } finally {
+           setLoadingTimes(false);
+         }
+       };
+   
+       fetchTimes();
+     }, [date, masterId]);
+     */
 
      return (
           <div className={styles.container}>
                <div className={styles.leftSide}>
                     <h2>Выберите дату</h2>
-                    <Calendar
-                         onChange={handleDateChange}
-                         value={date}
-                         tileClassName={getTileClass}
-                         className={styles.reactCalendar}
-                    />
+                    <Calendar onChange={handleDateChange} value={date} className={styles.reactCalendar} />
 
-                    {availableTimes.length > 0 ? (
+                    {loadingTimes ? (
+                         <p>Загрузка времени...</p>
+                    ) : availableTimes.length > 0 ? (
                          <div className={styles.timeSlots}>
                               <h3>Доступное время:</h3>
                               <ul className={styles.timeList}>
                                    {availableTimes.map((time) => (
                                         <li key={time}>
-                                             <button className={styles.timeButton}>{time}</button>
+                                             <button className={styles.timeButton} onClick={() => handleBookTime(time)}>
+                                                  {time}
+                                             </button>
                                         </li>
                                    ))}
                               </ul>
@@ -104,10 +123,12 @@ const Reservation: React.FC = () => {
                               onChange={handleCodeChange}
                               className="input"
                          />
-                         <button type="submit" className={styles.button}>Отменить запись</button>
+                         <button type="submit" className={styles.button}>
+                              Отменить запись
+                         </button>
                     </form>
                     {isCodeValid === true && <p className="success">Запись отменена!</p>}
-                    {isCodeValid === false && <p className="error">Неверный код!</p>}
+                    {isCodeValid === false && <p className="error">Неверный номер!</p>}
                </div>
           </div>
      );
