@@ -47,25 +47,40 @@ definitions:
     type: object
   handlers.setDayOffInput:
     properties:
-      day_of_week:
+      date:
         type: string
       is_day_off:
         type: boolean
     required:
-    - day_of_week
+    - date
     type: object
-  handlers.setWorkingHoursInput:
+  handlers.setWorkingSlotsInput:
     properties:
       day_of_week:
         type: string
-      time_end:
-        type: string
-      time_start:
-        type: string
+      slots:
+        items:
+          type: string
+        minItems: 1
+        type: array
     required:
     - day_of_week
-    - time_end
-    - time_start
+    - slots
+    type: object
+  models.TodaySchedule:
+    properties:
+      appointments:
+        items:
+          type: string
+        type: array
+      days_off:
+        items:
+          type: string
+        type: array
+      slots:
+        items:
+          type: string
+        type: array
     type: object
   models.User:
     properties:
@@ -340,14 +355,14 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update working hours for a day of week
+      description: Update exact time slots for a day of week
       parameters:
-      - description: Working hours input
+      - description: Working slots input
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/handlers.setWorkingHoursInput'
+          $ref: '#/definitions/handlers.setWorkingSlotsInput'
       produces:
       - application/json
       responses:
@@ -367,7 +382,30 @@ paths:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Set working hours for master
+      summary: Set working slots for master
+      tags:
+      - schedule
+  /schedule/today:
+    get:
+      description: Get working schedule slots for the current user for today
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Today's schedule
+          schema:
+            $ref: '#/definitions/models.TodaySchedule'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get today's schedule
       tags:
       - schedule
 securityDefinitions:

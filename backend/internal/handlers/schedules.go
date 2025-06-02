@@ -103,7 +103,7 @@ func (h *Handler) SetWorkingHours(c *gin.Context) {
 // @Tags         schedule
 // @Security     BearerAuth
 // @Produce      json
-// @Success      200  {object} models.Schedule  "Today's schedule"
+// @Success      200  {object} models.TodaySchedule  "Today's schedule"
 // @Failure      401  {object} ErrorResponse
 // @Failure      500  {object} ErrorResponse
 // @Router       /schedule/today [get]

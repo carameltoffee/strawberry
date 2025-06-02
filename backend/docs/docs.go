@@ -406,7 +406,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update working hours for a day of week",
+                "description": "Update exact time slots for a day of week",
                 "consumes": [
                     "application/json"
                 ],
@@ -416,15 +416,15 @@ const docTemplate = `{
                 "tags": [
                     "schedule"
                 ],
-                "summary": "Set working hours for master",
+                "summary": "Set working slots for master",
                 "parameters": [
                     {
-                        "description": "Working hours input",
+                        "description": "Working slots input",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.setWorkingHoursInput"
+                            "$ref": "#/definitions/handlers.setWorkingSlotsInput"
                         }
                     }
                 ],
@@ -436,6 +436,43 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedule/today": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get working schedule slots for the current user for today",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedule"
+                ],
+                "summary": "Get today's schedule",
+                "responses": {
+                    "200": {
+                        "description": "Today's schedule",
+                        "schema": {
+                            "$ref": "#/definitions/models.TodaySchedule"
                         }
                     },
                     "401": {
@@ -529,10 +566,10 @@ const docTemplate = `{
         "handlers.setDayOffInput": {
             "type": "object",
             "required": [
-                "day_of_week"
+                "date"
             ],
             "properties": {
-                "day_of_week": {
+                "date": {
                     "type": "string"
                 },
                 "is_day_off": {
@@ -540,22 +577,45 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.setWorkingHoursInput": {
+        "handlers.setWorkingSlotsInput": {
             "type": "object",
             "required": [
                 "day_of_week",
-                "time_end",
-                "time_start"
+                "slots"
             ],
             "properties": {
                 "day_of_week": {
                     "type": "string"
                 },
-                "time_end": {
-                    "type": "string"
+                "slots": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.TodaySchedule": {
+            "type": "object",
+            "properties": {
+                "appointments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
-                "time_start": {
-                    "type": "string"
+                "days_off": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "slots": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
