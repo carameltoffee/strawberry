@@ -470,9 +470,16 @@ const docTemplate = `{
                 "summary": "Get today's schedule",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "date",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "user's id",
-                        "name": "id",
+                        "name": "date",
                         "in": "path",
                         "required": true
                     }
