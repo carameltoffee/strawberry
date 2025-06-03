@@ -42,14 +42,21 @@ export interface User {
      registered_at: string;
 }
 
+export interface Schedule {
+     days_off: string[];
+     slots: string[];
+     appointments: string[];
+}
+
+
 export interface SetDayOffInput {
-     date: string;        
+     date: string;
      is_day_off?: boolean;
 }
 
 export interface SetWorkingSlotsInput {
-     day_of_week: string;  
-     slots: string[];     
+     day_of_week: string;
+     slots: string[];
 }
 
 async function request<T>(
@@ -126,4 +133,10 @@ export const api = {
      setWorkingHours(token: string, input: SetWorkingSlotsInput): Promise<void> {
           return request("PUT", "/schedule/hours", token, input);
      },
+
+     getSchedule(token: string, id: number, date: string): Promise<Schedule> {
+          const params = new URLSearchParams({ date });
+          return request("GET", `/schedule/${id}?${params.toString()}`, token);
+     },
+
 };

@@ -8,15 +8,28 @@ import { api } from "../../api/api_client";
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
+interface TodaySchedule {
+     days_off: string[];
+     slots: string[];
+     appointments: string[];
+}
+
+const getLocalDateString = (date: Date) => {
+     const year = date.getFullYear();
+     const month = (date.getMonth() + 1).toString().padStart(2, "0");
+     const day = date.getDate().toString().padStart(2, "0");
+     return `${year}-${month}-${day}`;
+};
+
 const Reservation: React.FC = () => {
      const { id } = useParams<{ id: string }>();
      const masterId = id ? Number(id) : NaN;
 
      const [date, setDate] = useState<Date | null>(new Date());
      const [secretCode, setSecretCode] = useState<string>("");
-     const [isCodeValid, setIsCodeValid] = useState<boolean | null>(null);
-     const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-     const [loadingTimes, setLoadingTimes] = useState(false);
+     const [schedule, setSchedule] = useState<TodaySchedule | null>(null);
+     const [loadingSchedule, setLoadingSchedule] = useState(false);
+
      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
      if (!id || isNaN(masterId)) {
@@ -29,6 +42,7 @@ const Reservation: React.FC = () => {
           } else {
                setDate(newDate);
           }
+          setSchedule(null);
      };
 
      const handleCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,9 +55,8 @@ const Reservation: React.FC = () => {
 
           try {
                await api.deleteAppointment(token, Number(secretCode));
-               setIsCodeValid(true);
           } catch (err) {
-               setIsCodeValid(false);
+               console.log(err);
           }
      };
 
@@ -51,8 +64,8 @@ const Reservation: React.FC = () => {
           if (!token) return alert("Please log in first");
           if (!date) return;
 
-          const dateStr = date.toISOString().split("T")[0];
-          const datetime = `${dateStr}T${time}`;
+          const dateStr = getLocalDateString(date);
+          const datetime = `${dateStr} ${time}`;
 
           try {
                const res = await api.createAppointment(token, {
@@ -60,56 +73,80 @@ const Reservation: React.FC = () => {
                     time: datetime,
                });
                alert("Appointment created. ID: " + res.id);
+               fetchSchedule(date);
           } catch (err: any) {
                alert("Failed to book: " + err.message);
           }
      };
 
-     // Uncomment and update useEffect if needed
-     /*
+     const fetchSchedule = async (date: Date) => {
+          if (!token) return;
+          setLoadingSchedule(true);
+          const dateStr = getLocalDateString(date);
+          try {
+               const sched = await api.getSchedule(token, masterId, dateStr);
+               setSchedule(sched);
+          } catch {
+               setSchedule(null);
+          } finally {
+               setLoadingSchedule(false);
+          }
+     };
+
      useEffect(() => {
-       const fetchTimes = async () => {
-         if (!date) return;
-         setLoadingTimes(true);
-         const dateStr = date.toISOString().split("T")[0];
-   
-         try {
-           const times = await api.getAvailableTimes(masterId, dateStr);
-           setAvailableTimes(times);
-         } catch (err) {
-           setAvailableTimes([]);
-         } finally {
-           setLoadingTimes(false);
-         }
-       };
-   
-       fetchTimes();
+          if (date) {
+               fetchSchedule(date);
+          }
      }, [date, masterId]);
-     */
+
+     const dateStr = date ? getLocalDateString(date) : "";
+
+     const isDayOff =
+          schedule && Array.isArray(schedule.days_off)
+               ? schedule.days_off.includes(dateStr)
+               : false;
 
      return (
           <div className={styles.container}>
                <div className={styles.leftSide}>
                     <h2>Выберите дату</h2>
-                    <Calendar onChange={handleDateChange} value={date} className={styles.reactCalendar} />
+                    <Calendar
+                         onChange={handleDateChange}
+                         value={date}
+                         className={styles.reactCalendar}
+                    />
 
-                    {loadingTimes ? (
+                    {loadingSchedule ? (
                          <p>Загрузка времени...</p>
-                    ) : availableTimes.length > 0 ? (
+                    ) : isDayOff ? (
+                         <p className={styles.noTimes}>Выбранный день — выходной</p>
+                    ) : schedule && Array.isArray(schedule.slots) && schedule.slots.length > 0 ? (
                          <div className={styles.timeSlots}>
                               <h3>Доступное время:</h3>
                               <ul className={styles.timeList}>
-                                   {availableTimes.map((time) => (
-                                        <li key={time}>
-                                             <button className={styles.timeButton} onClick={() => handleBookTime(time)}>
-                                                  {time}
-                                             </button>
-                                        </li>
-                                   ))}
+                                   {schedule.slots.map((time) => {
+                                        const isBooked =
+                                             schedule.appointments &&
+                                             Array.isArray(schedule.appointments) &&
+                                             schedule.appointments.includes(time);
+
+                                        return (
+                                             <li key={time}>
+                                                  <button
+                                                       className={styles.timeButton}
+                                                       onClick={() => handleBookTime(time)}
+                                                       disabled={!!isBooked}
+                                                       title={isBooked ? "Время занято" : undefined}
+                                                  >
+                                                       {time} {isBooked ? "(занято)" : ""}
+                                                  </button>
+                                             </li>
+                                        );
+                                   })}
                               </ul>
                          </div>
                     ) : (
-                         date && <p className={styles.noTimes}>Нет доступного времени на выбранную дату</p>
+                         <p className={styles.noTimes}>Нет доступного времени на выбранную дату</p>
                     )}
                </div>
 
@@ -127,8 +164,7 @@ const Reservation: React.FC = () => {
                               Отменить запись
                          </button>
                     </form>
-                    {isCodeValid === true && <p className="success">Запись отменена!</p>}
-                    {isCodeValid === false && <p className="error">Неверный номер!</p>}
+                    {/* <p className="success">Запись отменена!</p> */}
                </div>
           </div>
      );
