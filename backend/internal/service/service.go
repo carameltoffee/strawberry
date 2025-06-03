@@ -6,6 +6,7 @@ import (
 	"strawberry/internal/repository"
 	hasher "strawberry/pkg/hash"
 	"strawberry/pkg/jwt"
+	"strawberry/pkg/rabbitmq"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type Service struct {
 type Schedules interface {
 	SetDayOff(ctx context.Context, userId int64, date string, isDayOff bool) error
 	SetWorkingSlots(ctx context.Context, userId int64, dayOfWeek string, slots []string) error
-	GetSchedule(ctx context.Context,date string, userId int64) (*models.TodaySchedule, error)
+	GetSchedule(ctx context.Context, date string, userId int64) (*models.TodaySchedule, error)
 }
 
 type Users interface {
@@ -43,6 +44,7 @@ type Appointments interface {
 
 type Deps struct {
 	Repository *repository.Repository
+	RabbitMq   *rabbitmq.MQConnection
 	JwtMgr     jwt.JwtManager
 	Hasher     *hasher.Hasher
 }
@@ -50,7 +52,7 @@ type Deps struct {
 func New(d *Deps) *Service {
 	return &Service{
 		Users:        newUsersService(d.Repository, d.JwtMgr, d.Hasher),
-		Appointments: newAppointmentsService(d.Repository),
+		Appointments: newAppointmentsService(d.Repository, d.RabbitMq),
 		Schedules:    newSchedulesService(d.Repository),
 	}
 }

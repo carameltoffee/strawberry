@@ -2,22 +2,28 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strawberry/internal/models"
 	"strawberry/internal/repository"
+	"strawberry/pkg/helper"
 	"strawberry/pkg/logger"
+	"strawberry/pkg/rabbitmq"
 	"time"
 
+	"github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 )
 
 type AppointmentsService struct {
-	r *repository.Repository
+	r   *repository.Repository
+	rmq *rabbitmq.MQConnection
 }
 
-func newAppointmentsService(r *repository.Repository) Appointments {
+func newAppointmentsService(r *repository.Repository, rmq *rabbitmq.MQConnection) Appointments {
 	return &AppointmentsService{
-		r: r,
+		r:   r,
+		rmq: rmq,
 	}
 }
 
@@ -39,17 +45,101 @@ func (s *AppointmentsService) Create(ctx context.Context, a *models.Appointment)
 
 	id, err := s.r.Appointments.Create(ctx, a)
 	if err != nil {
-		if errors.Is(err, repository.ErrAppointmentConflict) {
+		switch {
+		case errors.Is(err, repository.ErrAppointmentConflict):
 			l.Warn("appointment conflict", zap.Error(err))
 			return 0, ErrAppointmentConflict
-		}
-		if errors.Is(err, repository.ErrMasterUnavailable) {
+		case errors.Is(err, repository.ErrMasterUnavailable):
 			return 0, ErrMasterUnavaliable
+		default:
+			l.Error("failed to create appointment", zap.Error(err))
+			return 0, ErrInternal
 		}
-		l.Error("failed to create appointment", zap.Error(err))
-		return 0, ErrInternal
 	}
+
+	if err := s.publishAppointmentCreated(ctx, id, a); err != nil {
+		l.Error("failed to publish appointment.created", zap.Error(err))
+	}
+
 	return id, nil
+}
+
+func (s *AppointmentsService) publishAppointmentCreated(ctx context.Context, id int64, a *models.Appointment) error {
+	l := logger.FromContext(ctx)
+
+	notification := struct {
+		AppointmentId int64     `json:"appointment_id"`
+		UserId        int64     `json:"user_id"`
+		MasterId      int64     `json:"master_id"`
+		Time          time.Time `json:"time"`
+	}{
+		AppointmentId: id,
+		UserId:        a.UserID,
+		MasterId:      a.MasterID,
+		Time:          a.ScheduledAt,
+	}
+
+	return helper.Retry(ctx, 3, 100*time.Millisecond, func() error {
+		body, err := json.Marshal(notification)
+		if err != nil {
+			l.Error("failed to marshal appointment.created payload", zap.Error(err))
+			return err
+		}
+		if err := s.rmq.Channel.Publish(
+			"appointments",
+			"appointments.created",
+			false,
+			false,
+			amqp091.Publishing{
+				ContentType: "application/json",
+				Body:        body,
+			},
+		); err != nil {
+			l.Error("can't send message to rmq", zap.String("reason", err.Error()))
+			return ErrInternal
+		}
+		l.Info("message sended to rabbitmq!!")
+		return nil
+	})
+}
+
+func (s *AppointmentsService) publishAppointmentDeleted(ctx context.Context, id int64, a *models.Appointment) error {
+	l := logger.FromContext(ctx)
+
+	notification := struct {
+		AppointmentId int64     `json:"appointment_id"`
+		UserId        int64     `json:"user_id"`
+		MasterId      int64     `json:"master_id"`
+		Time          time.Time `json:"time"`
+	}{
+		AppointmentId: id,
+		UserId:        a.UserID,
+		MasterId:      a.MasterID,
+		Time:          a.ScheduledAt,
+	}
+
+	return helper.Retry(ctx, 3, 100*time.Millisecond, func() error {
+		body, err := json.Marshal(notification)
+		if err != nil {
+			l.Error("failed to marshal appointment.deleted payload", zap.Error(err))
+			return err
+		}
+		if err := s.rmq.Channel.Publish(
+			"appointments",
+			"appointments.deleted",
+			false,
+			false,
+			amqp091.Publishing{
+				ContentType: "application/json",
+				Body:        body,
+			},
+		); err != nil {
+			l.Error("can't send appointment.deleted message to rmq", zap.String("reason", err.Error()))
+			return ErrInternal
+		}
+		l.Info("appointment.deleted message sent to rabbitmq")
+		return nil
+	})
 }
 
 func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64) error {
@@ -63,6 +153,7 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 			return ErrAppointmentNotFound
 		}
 		l.Error("failed to get appointment", zap.Error(err))
+		return ErrInternal
 	}
 
 	if a.UserID != userId {
@@ -79,6 +170,11 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 		l.Error("failed to delete appointment", zap.Error(err))
 		return ErrInternal
 	}
+
+	if err := s.publishAppointmentDeleted(ctx, id, a); err != nil {
+		l.Error("failed to publish appointment.deleted", zap.Error(err))
+	}
+
 	return nil
 }
 
