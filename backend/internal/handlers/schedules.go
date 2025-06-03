@@ -102,14 +102,14 @@ func (h *Handler) SetWorkingHours(c *gin.Context) {
 // @Summary      Get today's schedule
 // @Description  Get working schedule slots for the current user for today
 // @Param date query string true "date"
-// @Param date path int true "user's id"
+// @Param id path int true "user's id"
 // @Tags         schedule
 // @Security     BearerAuth
 // @Produce      json
 // @Success      200  {object} models.TodaySchedule  "Today's schedule"
 // @Failure      401  {object} ErrorResponse
 // @Failure      500  {object} ErrorResponse
-// @Router       /schedule/{id}/today [get]
+// @Router       /schedule/{id} [get]
 func (h *Handler) GetSchedule(c *gin.Context) {
 	ctx := c.Request.Context()
 	userIdStr := c.Param("id")
