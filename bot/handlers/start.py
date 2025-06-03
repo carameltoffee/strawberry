@@ -5,12 +5,13 @@ from api.api_client import StrawberryAPIClient
 from keyboards.main_menu import main_menu  
 from db.db import store
 from aiogram.fsm.state import State, StatesGroup
+from utils.utils import JWTDecoder
 
 class LoginStates(StatesGroup):
     waiting_for_username = State()
     waiting_for_password = State()
 
-def create_start_router(api_client: StrawberryAPIClient) -> Router:
+def create_start_router(api_client: StrawberryAPIClient, jwt_manager: JWTDecoder) -> Router:
     start_router = Router()
 
     @start_router.message(F.text.in_({"/start", "/login"}))
@@ -30,8 +31,9 @@ def create_start_router(api_client: StrawberryAPIClient) -> Router:
         username = data.get("username")
         password = message.text
         try:
-            token = await api_client.login(username=username, password=password)  # await здесь!
-            store.save_user_token(message.from_user.id, token)
+            token = await api_client.login(username=username, password=password)  
+            user_id = jwt_manager.get_user_id(token=token)
+            store.save_user_token(user_id, token, message.from_user.id)
             await state.update_data(token=token)
             await state.clear()
             await message.answer("✅ Вы успешно авторизовались!", reply_markup=main_menu)

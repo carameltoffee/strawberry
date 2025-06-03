@@ -4,24 +4,25 @@ from api.api_client import StrawberryAPIClient
 from db.db import store  
 from keyboards.main_menu import main_menu
 from datetime import date
+from utils.utils import JWTDecoder
 
-def create_schedule_router(api_client: StrawberryAPIClient) -> Router:
+def create_schedule_router(api_client: StrawberryAPIClient, jwt_decoder: JWTDecoder) -> Router:
     router = Router()
 
     @router.message(F.text == "Показать расписание")
     async def cmd_show_schedule(message: Message):
-        user_id = message.from_user.id
-        token = store.get_user_token(user_id)
+        token = store.get_user_token(message.from_user.id)
+        user_id = jwt_decoder.get_user_id(token)
         if not token:
             await message.answer("❌ Вы не авторизованы. Введите /login.")
             return
 
-        schedule = await api_client.get_today_schedule(token)
+        today_str = date.today().isoformat()
+        
+        schedule = await api_client.get_schedule(user_id=user_id, date=today_str, token=token)
         if schedule is None:
             await message.answer("❌ Не удалось получить расписание на сегодня. Попробуйте позже.", reply_markup=main_menu)
             return
-
-        today_str = date.today().isoformat()
 
         appointments = schedule.get("appointments") or []
         slots = schedule.get("slots") or []
