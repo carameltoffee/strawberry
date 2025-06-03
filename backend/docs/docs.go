@@ -453,7 +453,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/schedule/{id}/today": {
+        "/schedule/{id}": {
             "get": {
                 "security": [
                     {
@@ -479,7 +479,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "user's id",
-                        "name": "date",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }

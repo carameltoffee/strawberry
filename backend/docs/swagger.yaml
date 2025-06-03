@@ -317,7 +317,7 @@ paths:
       summary: Register a new user or master
       tags:
       - auth
-  /schedule/{id}/today:
+  /schedule/{id}:
     get:
       description: Get working schedule slots for the current user for today
       parameters:
@@ -328,7 +328,7 @@ paths:
         type: string
       - description: user's id
         in: path
-        name: date
+        name: id
         required: true
         type: integer
       produces:

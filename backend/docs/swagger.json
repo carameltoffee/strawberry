@@ -446,7 +446,7 @@
                 }
             }
         },
-        "/schedule/{id}/today": {
+        "/schedule/{id}": {
             "get": {
                 "security": [
                     {
@@ -472,7 +472,7 @@
                     {
                         "type": "integer",
                         "description": "user's id",
-                        "name": "date",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
