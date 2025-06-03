@@ -22,6 +22,9 @@ type Config struct {
 		SecretKey string        `envconfig:"SECRET_KEY" required:"true"`
 		TTL       time.Duration `envconfig:"TTL" required:"true"`
 	}
+	RabbitMq struct {
+		Uri string `envconfig:"RABBITMQ_URL" default:"amqp://guest:guest@rabbitmq:5672/"`
+	}
 }
 
 func MustLoad() Config {
