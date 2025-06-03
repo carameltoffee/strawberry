@@ -14,6 +14,7 @@ import (
 	"strawberry/pkg/jwt"
 	"strawberry/pkg/logger"
 	db "strawberry/pkg/postgres"
+	"strawberry/pkg/rabbitmq"
 	"syscall"
 	"time"
 
@@ -49,10 +50,15 @@ func main() {
 	jwtMgr := jwt.NewJwtManagerKeyTTL(cfg.Jwt.SecretKey, cfg.Jwt.TTL)
 
 	repo := repository.New(pool)
+	rmq, err := rabbitmq.ConnectRabbitMQ(cfg.RabbitMq.Uri)
+	if err != nil {
+		panic(err)
+	}
 	svc := service.New(&service.Deps{
 		Repository: repo,
 		JwtMgr:     jwtMgr,
 		Hasher:     hasher.New(),
+		RabbitMq:   rmq,
 	})
 
 	h := handlers.New(svc, jwtMgr)
