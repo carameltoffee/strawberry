@@ -53,12 +53,12 @@ class StrawberryAPIClient:
             resp.raise_for_status()
             return resp.status == 200
 
-    async def get_today_schedule(self, token: str) -> Optional[Dict[str, Any]]:
+    async def get_schedule(self, user_id: int, date: str, token: str) -> Optional[Dict[str, Any]]:
         await self.start()
-        url = f"{self.base_url}/schedule/today" 
+        url = f"{self.base_url}/schedule/{user_id}"
         headers = self._headers(token)
-        
-        async with self.session.get(url, headers=headers) as resp:
+        params = {"date": date}
+
+        async with self.session.get(url, headers=headers, params=params) as resp:
             if resp.status == 200:
                 return await resp.json()
-
