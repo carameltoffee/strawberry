@@ -15,6 +15,20 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"       
+      - "15672:15672"    
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   migrator:
     build: .
     command: ["./migr", "up"]
@@ -36,6 +50,8 @@ services:
         condition: service_healthy
       migrator:
         condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "${REST_PORT:-8080}:${REST_PORT:-8080}"
     environment:
@@ -48,3 +64,4 @@ services:
       DB_SSLMODE: ${DB_SSLMODE:-disable}
       SECRET_KEY: ${SECRET_KEY}
       TTL: ${TTL}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/
