@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -29,7 +30,7 @@ func (r *postgresSchedulesRepository) SetDayOff(ctx context.Context, userID int6
 	return err
 }
 
-func (r *postgresSchedulesRepository) SetWorkingSlots(ctx context.Context, userID int64, dayOfWeek string, slots []string) error {
+func (r *postgresSchedulesRepository) SetWorkingSlotsByWeekDay(ctx context.Context, userID int64, dayOfWeek string, slots []string) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -56,6 +57,42 @@ func (r *postgresSchedulesRepository) SetWorkingSlots(ctx context.Context, userI
 	return tx.Commit(ctx)
 }
 
+func (r *postgresSchedulesRepository) SetWorkingSlotsByDate(ctx context.Context, userId int64, date time.Time, slots []string) error {
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, `
+		DELETE FROM date_slots WHERE user_id = $1 AND date = $2
+	`, userId, date.Format("2006-01-02"))
+	if err != nil {
+		return err
+	}
+
+	for _, slot := range slots {
+		_, err := tx.Exec(ctx, `
+			INSERT INTO date_slots (user_id, date, slot) VALUES ($1, $2, $3)
+		`, userId, date.Format("2006-01-02"), slot)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit(ctx)
+}
+
+func (r *postgresSchedulesRepository) DeleteWorkingSlotsByDate(ctx context.Context, userId int64, date time.Time) error {
+	_, err := r.db.Exec(ctx, `
+		DELETE FROM date_slots WHERE user_id = $1 AND date = $2
+	`, userId, date.Format("2006-01-02"))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *postgresSchedulesRepository) GetDaysOff(ctx context.Context, userId int64) ([]time.Time, error) {
 	query := `
 		SELECT date 
@@ -80,15 +117,14 @@ func (r *postgresSchedulesRepository) GetDaysOff(ctx context.Context, userId int
 	return dates, nil
 }
 
+func (r *postgresSchedulesRepository) GetSlotsByDay(ctx context.Context, userId int64, date time.Time, dayOfWeek string) ([]time.Time, error) {
+	queryDateSlots :=
+		`SELECT slot 
+        FROM date_slots 
+        WHERE user_id = $1 AND date = $2
+        ORDER BY slot;`
 
-func (r *postgresSchedulesRepository) GetSlotsByDay(ctx context.Context, userId int64, dayOfWeek string) ([]time.Time, error) {
-	query := `
-		SELECT slot 
-		FROM schedule_slots 
-		WHERE user_id = $1 AND day_of_week = LOWER($2)
-		ORDER BY slot;
-	`
-	rows, err := r.db.Query(ctx, query, userId, dayOfWeek)
+	rows, err := r.db.Query(ctx, queryDateSlots, userId, date)
 	if err != nil {
 		return nil, err
 	}
@@ -102,5 +138,30 @@ func (r *postgresSchedulesRepository) GetSlotsByDay(ctx context.Context, userId 
 		}
 		slots = append(slots, slot)
 	}
+
+	if len(slots) > 0 {
+		return slots, nil
+	}
+
+	queryScheduleSlots :=
+		`SELECT slot 
+        FROM schedule_slots 
+        WHERE user_id = $1 AND day_of_week = LOWER($2)
+        ORDER BY slot;`
+
+	rows, err = r.db.Query(ctx, queryScheduleSlots, userId, dayOfWeek)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var slot time.Time
+		if err := rows.Scan(&slot); err != nil {
+			return nil, err
+		}
+		slots = append(slots, slot)
+	}
+
 	return slots, nil
 }

@@ -23,41 +23,20 @@ func newPostgresAppointmentsRepository(db *pgxpool.Pool) Appointments {
 }
 
 func (r *postgresAppointmentsRepository) Create(ctx context.Context, a *models.Appointment) (int64, error) {
-	dayOfWeek := strings.ToLower(a.ScheduledAt.Weekday().String())
-	timeOfDay := a.ScheduledAt.Format("15:04:05")
-	date := a.ScheduledAt.Format("2006-01-02")
-
-	var offCount int
-	err := r.db.QueryRow(ctx,
-		`SELECT COUNT(*) FROM days_off_dates WHERE user_id = $1 AND date = $2`,
-		a.MasterID, date,
-	).Scan(&offCount)
-	if err != nil {
+	if unavailable, err := r.isMasterUnavailable(ctx, a.MasterID, a.ScheduledAt); err != nil {
 		return 0, err
-	}
-	if offCount > 0 {
+	} else if unavailable {
 		return 0, ErrMasterUnavailable
 	}
 
-	var slotCount int
-	err = r.db.QueryRow(ctx,
-		`SELECT COUNT(*) FROM schedule_slots WHERE user_id = $1 AND day_of_week = $2 AND slot = $3`,
-		a.MasterID, dayOfWeek, timeOfDay,
-	).Scan(&slotCount)
-	if err != nil {
-		return 0, err
-	}
-	if slotCount == 0 {
-		return 0, ErrMasterUnavailable
-	}
-
-	query := `
+	const query = `
 		INSERT INTO appointments (user_id, master_id, scheduled_at, status)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id;
 	`
+
 	var id int64
-	err = r.db.QueryRow(ctx, query, a.UserID, a.MasterID, a.ScheduledAt, a.Status).Scan(&id)
+	err := r.db.QueryRow(ctx, query, a.UserID, a.MasterID, a.ScheduledAt, a.Status).Scan(&id)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
@@ -65,7 +44,51 @@ func (r *postgresAppointmentsRepository) Create(ctx context.Context, a *models.A
 		}
 		return 0, err
 	}
+
 	return id, nil
+}
+
+func (r *postgresAppointmentsRepository) isMasterUnavailable(ctx context.Context, masterID int64, scheduledAt time.Time) (bool, error) {
+	date := scheduledAt.Format("2006-01-02")
+	timeOfDay := scheduledAt.Format("15:04:05")
+	dayOfWeek := strings.ToLower(scheduledAt.Weekday().String())
+
+	const dayOffQuery = `SELECT COUNT(*) FROM days_off_dates WHERE user_id = $1 AND date = $2`
+	if count, err := r.countQuery(ctx, dayOffQuery, masterID, date); err != nil {
+		return false, err
+	} else if count > 0 {
+		return true, nil
+	}
+
+	const dateSlotExistQuery = `SELECT COUNT(*) FROM date_slots WHERE user_id = $1 AND date = $2`
+	dateSlotCount, err := r.countQuery(ctx, dateSlotExistQuery, masterID, date)
+	if err != nil {
+		return false, err
+	}
+
+	var slotQuery string
+	var args []interface{}
+	if dateSlotCount > 0 {
+		slotQuery = `SELECT COUNT(*) FROM date_slots WHERE user_id = $1 AND date = $2 AND slot = $3`
+		args = []interface{}{masterID, date, timeOfDay}
+	} else {
+		slotQuery = `SELECT COUNT(*) FROM schedule_slots WHERE user_id = $1 AND day_of_week = $2 AND slot = $3`
+		args = []interface{}{masterID, dayOfWeek, timeOfDay}
+	}
+
+	if available, err := r.countQuery(ctx, slotQuery, args...); err != nil {
+		return false, err
+	} else if available == 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (r *postgresAppointmentsRepository) countQuery(ctx context.Context, query string, args ...interface{}) (int, error) {
+	var count int
+	err := r.db.QueryRow(ctx, query, args...).Scan(&count)
+	return count, err
 }
 
 func (r *postgresAppointmentsRepository) Delete(ctx context.Context, id int64) error {
