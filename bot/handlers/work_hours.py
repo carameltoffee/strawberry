@@ -107,5 +107,26 @@ def create_work_hours_router(api_client: StrawberryAPIClient) -> Router:
     async def process_delete_work_hours_by_date(message: Message, state: FSMContext):
         user_id = message.from_user.id
         token = store.get_user_token(user_id)
+
+        if not token:
+            await message.answer("❌ Вы не авторизованы. Введите /login.")
+            return
+
+        date_str = message.text.strip()
+        try:
+            parse_date(date_str)
+        except ValueError:
+            await message.answer("⚠️ Некорректная дата. Используйте формат YYYY-MM-DD.")
+            return
+
+        success = await api_client.delete_working_slots_by_date(date_str, token)
+
+        await message.answer(
+            f"🗑 Часы приёма на {date_str} удалены."
+            if success else "❌ Не удалось удалить часы приёма."
+        )
+        await state.clear()
+
+        
     
     return router
