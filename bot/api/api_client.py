@@ -42,9 +42,9 @@ class StrawberryAPIClient:
             resp.raise_for_status()
             return resp.status == 200
 
-    async def set_working_slots(self, day_of_week: str, slots: List[str], token: str) -> bool:
+    async def set_working_slots_by_weekday(self, day_of_week: str, slots: List[str], token: str) -> bool:
         await self.start()
-        url = f"{self.base_url}/schedule/hours"
+        url = f"{self.base_url}/schedule/hours/weekday"
         payload = {
             "day_of_week": day_of_week,
             "slots": slots
@@ -62,3 +62,34 @@ class StrawberryAPIClient:
         async with self.session.get(url, headers=headers, params=params) as resp:
             if resp.status == 200:
                 return await resp.json()
+    
+    async def set_working_slots_by_date(self, date: str, slots: List[str], token: str) -> bool:
+        await self.start()
+        url = f"{self.base_url}/schedule/hours/date"
+        payload = {
+            "date": date,
+            "slots": slots
+        }
+        async with self.session.put(url, json=payload, headers=self._headers(token)) as resp:
+            if resp.status == 200:
+                return True
+            elif resp.status == 400:
+                raise ValueError(f"Invalid input or bad date: {await resp.text()}")
+            else:
+                resp.raise_for_status()
+                
+    async def delete_working_slots_by_date(self, date: str, token: str) -> bool:
+        await self.start()
+        url = f"{self.base_url}/schedule/hours/date"
+        params = {"date": date}
+        async with self.session.delete(url, headers=self._headers(token), params=params) as resp:
+            if resp.status == 204:
+                return True
+            elif resp.status == 400:
+                raise ValueError(f"Invalid or missing date: {await resp.text()}")
+            elif resp.status == 401:
+                raise PermissionError(f"Unauthorized: {await resp.text()}")
+            else:
+                resp.raise_for_status()
+
+
