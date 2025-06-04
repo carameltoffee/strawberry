@@ -45,6 +45,18 @@ definitions:
       id:
         type: integer
     type: object
+  handlers.SetWorkingSlotsReq:
+    properties:
+      date:
+        type: string
+      slots:
+        items:
+          type: string
+        type: array
+    required:
+    - date
+    - slots
+    type: object
   handlers.setDayOffInput:
     properties:
       date:
@@ -385,7 +397,71 @@ paths:
       summary: Set day off for master
       tags:
       - schedule
-  /schedule/hours:
+  /schedule/hours/date:
+    delete:
+      description: Delete all working slots for a given date (master only).
+      parameters:
+      - description: Date in YYYY-MM-DD format
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Missing or invalid date
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete working slots
+      tags:
+      - schedule
+    put:
+      consumes:
+      - application/json
+      description: Set available time slots for a given date (master only).
+      parameters:
+      - description: working slots info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SetWorkingSlotsReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Invalid input or bad date
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Set working slots
+      tags:
+      - schedule
+  /schedule/hours/weekday:
     put:
       consumes:
       - application/json
