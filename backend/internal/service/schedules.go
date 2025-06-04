@@ -14,7 +14,9 @@ import (
 )
 
 var (
-	ErrBadDate = errors.New("bad date")
+	ErrBadDate        = errors.New("bad date")
+	ErrNoWorkingSlots = errors.New("no working slots")
+	DateFormat        = "2006-01-02"
 )
 
 type SchedulesService struct {
@@ -29,7 +31,7 @@ func (s *SchedulesService) SetDayOff(ctx context.Context, userId int64, dateStr 
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
 
-	date, err := time.Parse("2006-01-02", dateStr)
+	date, err := time.Parse(DateFormat, dateStr)
 	if err != nil {
 		l.Error("invalid date format", zap.String("date", dateStr), zap.Error(err))
 		return fmt.Errorf("invalid date format: %w", err)
@@ -45,7 +47,7 @@ func (s *SchedulesService) SetDayOff(ctx context.Context, userId int64, dateStr 
 	return nil
 }
 
-func (s *SchedulesService) SetWorkingSlots(ctx context.Context, userId int64, dayOfWeek string, slots []string) error {
+func (s *SchedulesService) SetWorkingSlotsByWeekDay(ctx context.Context, userId int64, dayOfWeek string, slots []string) error {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
 
@@ -66,7 +68,7 @@ func (s *SchedulesService) SetWorkingSlots(ctx context.Context, userId int64, da
 		}
 	}
 
-	err := s.repo.SetWorkingSlots(ctx, userId, dayOfWeek, slots)
+	err := s.repo.SetWorkingSlotsByWeekDay(ctx, userId, dayOfWeek, slots)
 	if err != nil {
 		l.Error("failed to set working slots", zap.Int64("userID", userId), zap.String("dayOfWeek", dayOfWeek), zap.Any("slots", slots), zap.Error(err))
 		return err
@@ -76,11 +78,50 @@ func (s *SchedulesService) SetWorkingSlots(ctx context.Context, userId int64, da
 	return nil
 }
 
+func (s *SchedulesService) SetWorkingSlotsByDate(ctx context.Context, userId int64, date string, slots []string) error {
+	ctx = logger.WithLogger(ctx)
+	l := logger.FromContext(ctx)
+
+	dateFormatted, err := time.Parse(DateFormat, date)
+	if err != nil {
+		l.Warn("invalid date format", zap.Error(err))
+		return ErrBadDate
+	}
+
+	err = s.repo.Schedules.SetWorkingSlotsByDate(ctx, userId, dateFormatted, slots)
+	if err != nil {
+		l.Warn("can't set working slots", zap.Error(err))
+		return ErrInternal
+	}
+	return nil
+}
+
+func (s *SchedulesService) DeleteWorkingSlotsByDate(ctx context.Context, userId int64, date string) error {
+	ctx = logger.WithLogger(ctx)
+	l := logger.FromContext(ctx)
+
+	dateFormatted, err := time.Parse(DateFormat, date)
+	if err != nil {
+		return ErrBadDate
+	}
+
+	err = s.repo.Schedules.DeleteWorkingSlotsByDate(ctx, userId, dateFormatted)
+	if err != nil {
+		if errors.Is(err, repository.ErrNoWorkingSlots) {
+			l.Warn("can't delete working slot", zap.Error(err))
+			return ErrNoWorkingSlots
+		}
+		l.Error("can't delete working slot", zap.Error(err))
+		return ErrInternal
+	}
+	return nil
+}
+
 func (s *SchedulesService) GetSchedule(ctx context.Context, date string, userId int64) (*models.TodaySchedule, error) {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
 
-	day, err := time.Parse("2006-01-02", date)
+	day, err := time.Parse(DateFormat, date)
 	if err != nil {
 		return nil, ErrBadDate
 	}
@@ -100,7 +141,7 @@ func (s *SchedulesService) GetSchedule(ctx context.Context, date string, userId 
 	}
 	var daysOff []string
 	for _, d := range offDates {
-		daysOff = append(daysOff, d.Format("2006-01-02"))
+		daysOff = append(daysOff, d.Format(DateFormat))
 	}
 
 	l.Info("Getting slots by day",
@@ -108,7 +149,7 @@ func (s *SchedulesService) GetSchedule(ctx context.Context, date string, userId 
 		zap.String("day_of_week", dayOfWeek),
 	)
 
-	slots, err := s.repo.GetSlotsByDay(ctx, userId, dayOfWeek)
+	slots, err := s.repo.GetSlotsByDay(ctx, userId, day, dayOfWeek)
 	if err != nil {
 		l.Error("Failed to get slots by day",
 			zap.Int64("user_id", userId),
@@ -124,14 +165,14 @@ func (s *SchedulesService) GetSchedule(ctx context.Context, date string, userId 
 
 	l.Info("Getting appointments by date",
 		zap.Int64("user_id", userId),
-		zap.String("date", day.Format("2006-01-02")),
+		zap.String("date", day.Format(DateFormat)),
 	)
 
 	appointments, err := s.repo.Appointments.GetByDate(ctx, userId, day)
 	if err != nil {
 		l.Error("Failed to get appointments by date",
 			zap.Int64("user_id", userId),
-			zap.String("date", day.Format("2006-01-02")),
+			zap.String("date", day.Format(DateFormat)),
 			zap.Error(err),
 		)
 	}
