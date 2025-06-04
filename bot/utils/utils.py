@@ -1,6 +1,10 @@
-from datetime import datetime, time
+from datetime import datetime, date
 from typing import Tuple, List
 import jwt  
+
+def parse_date(s: str) -> date:
+    dt = datetime.strptime(s, "%Y-%m-%d")
+    return dt.date()
 
 def parse_dates(raw_input: str) -> tuple[list, list]:
     raw_dates = raw_input.replace('\n', ' ').split()
