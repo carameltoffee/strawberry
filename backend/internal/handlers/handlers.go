@@ -25,8 +25,8 @@ func New(s *service.Service, j jwt.JwtManager) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
-	r := gin.Default()
-	r.Use(CORSMiddleware())
+	r := gin.New()
+	r.Use(LoggingMiddleware(), CORSMiddleware(), gin.Recovery())
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	api := r.Group("api")
 	{
@@ -46,7 +46,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			auth.DELETE("/appointments/:id", h.DeleteAppointment)
 
 			auth.PUT("/schedule/dayoff", h.SetDayOff)
-			auth.PUT("/schedule/hours", h.SetWorkingHours)
+
+			auth.PUT("/schedule/hours/weekday", h.SetWorkingSlotsByWeekDay)
+
+			auth.PUT("/schedule/hours/date", h.SetWorkingSlotsByDate)
+			auth.DELETE("/schedule/hours/date", h.DeleteWorkingSlotsByDate)
 		}
 	}
 	return r
