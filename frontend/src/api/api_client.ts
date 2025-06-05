@@ -20,6 +20,11 @@ export interface RegisterReq {
      specialization?: string;
 }
 
+export interface SetWorkingSlotsForDateInput {
+     date: string;
+     slots: string[];
+}
+
 export interface RegisterRes {
      id: number;
 }
@@ -130,13 +135,20 @@ export const api = {
           return request("PUT", "/schedule/dayoff", token, input);
      },
 
-     setWorkingHours(token: string, input: SetWorkingSlotsInput): Promise<void> {
-          return request("PUT", "/schedule/hours", token, input);
+     setWeeklyWorkingSlots(token: string, input: SetWorkingSlotsInput): Promise<void> {
+          return request("PUT", "/schedule/hours/weekday", token, input);
+     },
+
+     setDateWorkingSlots(token: string, input: SetWorkingSlotsForDateInput): Promise<void> {
+          return request("PUT", "/schedule/hours/date", token, input);
+     },
+
+     deleteDateWorkingSlots(token: string, date: string): Promise<void> {
+          return request("DELETE", `/schedule/hours/date?date=${encodeURIComponent(date)}`, token);
      },
 
      getSchedule(token: string, id: number, date: string): Promise<Schedule> {
           const params = new URLSearchParams({ date });
           return request("GET", `/schedule/${id}?${params.toString()}`, token);
      },
-
 };
