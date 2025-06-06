@@ -64,6 +64,15 @@ export interface SetWorkingSlotsInput {
      slots: string[];
 }
 
+export interface Appointment {
+     id: number;
+     user_id: number;
+     master_id: number;
+     scheduled_at: string;
+     created_at: string;
+     status: string;
+}
+
 async function request<T>(
      method: string,
      path: string,
@@ -118,6 +127,14 @@ export const api = {
 
      deleteAppointment(token: string, id: number): Promise<void> {
           return request("DELETE", `/appointments/${id}`, token);
+     },
+
+     getAppointments(token: string): Promise<Appointment> {
+          return request("GET", `/appointments`, token);
+     },
+
+     getMasterById(id: number): Promise<User> {
+          return request("GET", `/users/${id}`)
      },
 
      getMasters(specialization?: string, min_rating?: number): Promise<User[]> {
