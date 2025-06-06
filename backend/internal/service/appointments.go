@@ -187,7 +187,16 @@ func (s *AppointmentsService) GetByUserId(ctx context.Context, id int64) ([]mode
 		l.Error("failed to get appointments by user ID", zap.Error(err))
 		return nil, ErrInternal
 	}
-	return appointments, nil
+
+	var validAppointments []models.Appointment
+	for _, appt := range appointments {
+		if err := appt.Validate(); err != nil {
+			l.Info("failed validating", zap.Error(err))
+		} else {
+			validAppointments = append(validAppointments, appt)
+		}
+	}
+	return validAppointments, nil
 }
 
 func (s *AppointmentsService) GetByMasterId(ctx context.Context, id int64) ([]models.Appointment, error) {

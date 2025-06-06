@@ -37,6 +37,11 @@ func (m *Users) GetByFullName(ctx context.Context, fn string) ([]models.User, er
 	return args.Get(0).([]models.User), args.Error(1)
 }
 
+func (m *Users) GetById(ctx context.Context, id int64) (*models.User, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(*models.User), args.Error(1)
+}
+
 func (m *Users) GetByUsername(ctx context.Context, username string) (*models.User, error) {
 	args := m.Called(ctx, username)
 	if args.Get(0) == nil {

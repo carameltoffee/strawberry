@@ -113,6 +113,21 @@ func (s *UsersService) GetByFullName(ctx context.Context, fn string) ([]models.U
 	return users, nil
 }
 
+func (s *UsersService) GetById(ctx context.Context, id int64) (*models.User, error) {
+	ctx = logger.WithLogger(ctx)
+	l := logger.FromContext(ctx)
+
+	user, err := s.r.Users.GetById(ctx, id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNoUsers) {
+			return nil, ErrUserNotFound
+		}
+		l.Error("can't get user", zap.Error(err))
+		return nil, ErrInternal
+	}
+	return user, nil
+}
+
 func (s *UsersService) GetByUsername(ctx context.Context, un string) (*models.User, error) {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
