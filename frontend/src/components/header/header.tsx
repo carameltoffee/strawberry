@@ -1,45 +1,66 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './header.module.css';
+import React, { useState } from "react";
+import styles from "./header.module.css";
+// import { Link } from "react-router-dom";
 
 type Props = {
      title: string;
-     isAuthenticated: boolean;  
+     isAuthenticated: boolean;
+     onLogout: () => void;
 };
 
-const Header: React.FC<Props> = ({ title, isAuthenticated }) => {
+const Header: React.FC<Props> = ({ title, isAuthenticated, onLogout }) => {
      const [menuOpen, setMenuOpen] = useState(false);
-     const navigate = useNavigate();
 
      const toggleMenu = () => {
-          setMenuOpen(prev => !prev);
-     };
-
-     const handleRegisterClick = () => {
-          navigate('/auth?mode=register');
-     };
-
-     const handleLoginClick = () => {
-          navigate('/auth?mode=login');
+          setMenuOpen((prev) => !prev);
      };
 
      const handleLogoutClick = () => {
-          localStorage.removeItem('token');
-          navigate('/');
+          onLogout();
      };
 
      return (
           <header className={styles.header}>
-               <button className={styles.menu} onClick={toggleMenu}>☰</button>
-               <div className={styles.logo}>{title}</div>
-               <nav className={`${styles.nav} ${menuOpen ? styles.active : ''}`}>
+               <button className={styles.menu} onClick={toggleMenu}>
+                    ☰
+               </button>
+               <div className={styles.logo}>
+                    <a href="/" className={styles.logoLink}>{title}</a>
+               </div>
+               <nav className={`${styles.nav} ${menuOpen ? styles.active : ""}`}>
                     {!isAuthenticated ? (
                          <>
-                              <button className={styles.register} onClick={handleRegisterClick}>Регистрация</button>
-                              <button className={styles.login} onClick={handleLoginClick}>Вход</button>
+                              <button
+                                   className={styles.register}
+                                   onClick={() => {
+                                        window.location.href = "/auth/register";
+                                   }}
+                              >
+                                   Регистрация
+                              </button>
+                              <button
+                                   className={styles.login}
+                                   onClick={() => {
+                                        window.location.href = "/auth/login";
+                                   }}
+                              >
+                                   Вход
+                              </button>
                          </>
                     ) : (
-                         <button className={styles.logout} onClick={handleLogoutClick}>Выход</button>
+                         <>
+                              <button className={styles.logout} onClick={handleLogoutClick}>
+                                   Выход
+                              </button>
+                              <button
+                                   className={styles.profile}
+                                   onClick={() => {
+                                        window.location.href = "/user";
+                                   }}
+                              >
+                                   Мой профиль
+                              </button>
+                         </>
                     )}
                </nav>
           </header>

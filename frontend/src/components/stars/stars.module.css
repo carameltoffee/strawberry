@@ -1,0 +1,20 @@
+.star {
+     color: #e4e5e9;
+}
+
+.starFilled {
+     color: #ffc107;
+}
+
+.starHalfContainer {
+     position: relative;
+     display: inline-block;
+     overflow: hidden;
+     width: 0.5em;
+     color: #ffc107;
+}
+
+.starHalfOverlay {
+     color: #e4e5e9;
+     margin-left: -0.5em;
+}

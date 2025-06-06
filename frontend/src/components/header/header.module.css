@@ -1,106 +1,95 @@
 .header {
      display: flex;
-     justify-content: space-between;
      align-items: center;
-     background-color: #ffe4e1;
-     padding: 1rem 2rem;
-     border-radius: 12px;
-     box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
-     font-family: 'Comic Sans MS', 'Segoe UI', cursive;
-     position: relative;
+     justify-content: space-between;
+     background-color: #f6f8fa;
+     padding: 0.75rem 1.5rem;
+     border-bottom: 1px solid #d1d5da;
+     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+     font-size: 14px;
+     line-height: 1.5;
+     color: #24292e;
+     position: sticky;
+     top: 0;
+     z-index: 1000;
 }
 
 .logo {
-     font-size: 1.8rem;
-     font-weight: bold;
-     color: #ff69b4;
+     font-weight: 600;
+     font-size: 1.2rem;
+     color: #0366d6;
+     cursor: default;
+}
+
+.logoLink {
+  all: unset;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.logoLink:hover {
+  text-decoration: none;
 }
 
 .menu {
-     display: none;
-     font-size: 2rem;
      background: none;
      border: none;
-     color: #ff69b4;
+     font-size: 1.5rem;
+     color: #24292e;
      cursor: pointer;
-}
-
-
-.link {
-     text-decoration: none;
-     color: #ff1493;
-     font-weight: 500;
-     transition: color 0.3s ease;
-}
-
-.link:hover {
-     color: #c71585;
-}
-
-.login,
-.register {
-     background-color: #ffb6c1;
-     color: white;
-     font-family: 'Comic Sans MS', 'Segoe UI', cursive;
-     font-size: 16px;
-     padding: 10px 20px;
-     border: none;
-     border-radius: 25px;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-     transition: all 0.3s ease;
-     cursor: pointer;
-}
-
-.login:hover,
-.register:hover {
-     background-color: #ff69b4;
+     display: none;
 }
 
 .nav {
      display: flex;
-     gap: 1rem;
+     gap: 0.75rem;
      align-items: center;
-     transition: all 0.3s ease;
+}
+
+.register,
+.login,
+.logout,
+.profile {
+     font-size: 14px;
+     font-weight: 600;
+     color: #24292e;
+     background-color: #eff3f6;
+     border: 1px solid #d1d5da;
+     border-radius: 6px;
+     padding: 6px 12px;
+     cursor: pointer;
+     transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+     user-select: none;
+}
+
+.register:hover,
+.login:hover,
+.logout:hover {
+     background-color: #e1e4e8;
+     border-color: #a8b0b9;
 }
 
 @media (max-width: 768px) {
+     .menu {
+          display: block;
+     }
+
      .nav {
-          flex-direction: column;
-          background-color: #ffe4e1;
-          padding: 0 1rem;
           position: absolute;
           top: 100%;
           left: 0;
           right: 0;
-          z-index: 999;
-          border-radius: 0 0 12px 12px;
-
-          max-height: 0;
-          overflow: hidden;
-          opacity: 0;
-          transform: translateY(-10px);
-          transition: max-height 0.4s ease, opacity 0.3s ease, transform 0.3s ease;
-     }
-
-     .active {
-          max-height: 300px;
-          opacity: 1;
-          transform: translateY(0);
+          background-color: #f6f8fa;
+          flex-direction: column;
+          align-items: flex-start;
           padding: 1rem;
-     }
-
-     .menu {
-          display: block;
-          font-size: 2rem;
-          background: none;
-          border: none;
-          color: #ff69b4;
-          cursor: pointer;
-     }
-}
-
-@media (min-width: 769px) {
-     .menu {
+          border-top: 1px solid #d1d5da;
           display: none;
      }
+
+     .nav.active {
+          display: flex;
+     }
 }
+
