@@ -79,6 +79,21 @@ definitions:
     - day_of_week
     - slots
     type: object
+  models.Appointment:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      master_id:
+        type: integer
+      scheduled_at:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: integer
+    type: object
   models.TodaySchedule:
     properties:
       appointments:
@@ -116,6 +131,45 @@ info:
   version: "1.0"
 paths:
   /appointments:
+    get:
+      consumes:
+      - application/json
+      description: Get appointments filtered by date and/or status
+      parameters:
+      - description: Filter by date in format YYYY-MM-DD
+        in: query
+        name: date
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Appointment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get appointments for the authenticated user
+      tags:
+      - appointments
     post:
       consumes:
       - application/json
