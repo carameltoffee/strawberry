@@ -33,7 +33,7 @@ func (a *Appointment) Validate() error {
 		return errors.New("user cannot book an appointment with themselves")
 	}
 
-	if a.ScheduledAt.Before(time.Now().Add(1 * time.Minute)) {
+	if a.ScheduledAt.UTC().Before(time.Now().Add(1 * time.Minute)) {
 		return errors.New("scheduled_at must be in the future")
 	}
 

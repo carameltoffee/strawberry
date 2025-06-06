@@ -51,13 +51,5 @@ func (u *User) Validate() error {
 		return errors.New("average rating must be between 0 and 5")
 	}
 
-	if u.Specialization != "" {
-		for _, r := range u.Specialization {
-			if !unicode.IsLetter(r) {
-				return errors.New("specialization must contain only letters")
-			}
-		}
-	}
-
 	return nil
 }
