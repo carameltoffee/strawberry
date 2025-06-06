@@ -88,7 +88,6 @@ func (h *Handler) CreateAppointment(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Security BearerAuth
 // @Router /appointments [get]
-
 func (h *Handler) GetAppointments(c *gin.Context) {
 	claims, exists := getClaims(c)
 	if !exists {
@@ -97,64 +96,10 @@ func (h *Handler) GetAppointments(c *gin.Context) {
 	}
 	userId := claims.Id
 
-	dateStr := c.Query("date")
-	status := c.Query("status")
-
-	var appointments []models.Appointment
-	var err error
-
-	switch {
-	case dateStr != "" && status != "":
-		date, err := time.Parse("2006-01-02", dateStr)
-		if err != nil {
-			newErrorResponse(http.StatusBadRequest, "invalid date format", c)
-			return
-		}
-		appointments, err = h.s.Appointments.GetByDate(c.Request.Context(), userId, date)
-		if err != nil {
-			newErrorResponse(http.StatusInternalServerError, "failed to get appointments by date", c)
-			return
-		}
-		filtered := []models.Appointment{}
-		for _, a := range appointments {
-			if a.Status == status {
-				filtered = append(filtered, a)
-			}
-		}
-		appointments = filtered
-
-	case dateStr != "":
-		date, err := time.Parse("2006-01-02", dateStr)
-		if err != nil {
-			newErrorResponse(http.StatusBadRequest, "invalid date format", c)
-			return
-		}
-		appointments, err = h.s.Appointments.GetByDate(c.Request.Context(), userId, date)
-		if err != nil {
-			newErrorResponse(http.StatusInternalServerError, "failed to get appointments by date", c)
-			return
-		}
-
-	case status != "":
-		appointments, err = h.s.Appointments.GetByStatus(c.Request.Context(), status)
-		if err != nil {
-			newErrorResponse(http.StatusInternalServerError, "failed to get appointments by status", c)
-			return
-		}
-		filtered := []models.Appointment{}
-		for _, a := range appointments {
-			if a.UserID == userId {
-				filtered = append(filtered, a)
-			}
-		}
-		appointments = filtered
-
-	default:
-		appointments, err = h.s.Appointments.GetByUserId(c.Request.Context(), userId)
-		if err != nil {
-			newErrorResponse(http.StatusInternalServerError, "failed to get appointments", c)
-			return
-		}
+	appointments, err := h.s.Appointments.GetByUserId(c.Request.Context(), userId)
+	if err != nil {
+		newErrorResponse(http.StatusInternalServerError, "failed to get appointments", c)
+		return
 	}
 
 	c.JSON(http.StatusOK, appointments)

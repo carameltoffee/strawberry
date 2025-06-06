@@ -115,10 +115,24 @@ func (h *Handler) GetMasterByUsername(c *gin.Context) {
 		return
 	}
 
-	if master.Specialization == "user" {
-		newErrorResponse(http.StatusBadRequest, "not a master", c)
+	c.JSON(http.StatusOK, master)
+}
+
+func (h *Handler) GetMasterById(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		newErrorResponse(http.StatusBadRequest, "invalid id", c)
 		return
 	}
-
+	master, err := h.s.Users.GetById(c.Request.Context(), id)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			newErrorResponse(http.StatusNotFound, "no users found", c)
+			return
+		}
+		newErrorResponse(http.StatusInternalServerError, "internal", c)
+		return
+	}
 	c.JSON(http.StatusOK, master)
 }

@@ -36,6 +36,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		api.GET("/masters", h.GetMasters)
 		api.GET("/masters/:username", h.GetMasterByUsername)
+		api.GET("/users/:id", h.GetMasterById)
 
 		api.GET("schedule/:id", h.GetSchedule)
 		auth := api.Group("/")
