@@ -13,6 +13,7 @@ import (
 	hasher "strawberry/pkg/hash"
 	"strawberry/pkg/jwt"
 	"strawberry/pkg/logger"
+	minio_client "strawberry/pkg/minio"
 	db "strawberry/pkg/postgres"
 	"strawberry/pkg/rabbitmq"
 	"syscall"
@@ -50,6 +51,11 @@ func main() {
 	jwtMgr := jwt.NewJwtManagerKeyTTL(cfg.Jwt.SecretKey, cfg.Jwt.TTL)
 
 	repo := repository.New(pool)
+	minio, err := minio_client.New(fmt.Sprintf("minio:%d", cfg.Minio.Port), cfg.Minio.AccessKey,
+		cfg.Minio.SecretKey, cfg.Minio.SslMode)
+	if err != nil {
+		panic(err)
+	}
 	rmq, err := rabbitmq.ConnectRabbitMQ(cfg.RabbitMq.Uri)
 	if err != nil {
 		panic(err)
@@ -59,6 +65,7 @@ func main() {
 		JwtMgr:     jwtMgr,
 		Hasher:     hasher.New(),
 		RabbitMq:   rmq,
+		Minio:      minio,
 	})
 
 	h := handlers.New(svc, jwtMgr)

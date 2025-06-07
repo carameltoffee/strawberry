@@ -44,9 +44,10 @@ type File interface {
 	GetAvatar(ctx context.Context, userId int64) (io.ReadCloser, error)
 	DeleteAvatar(ctx context.Context, userId int64) error
 
-	UploadWork(ctx context.Context, userId, workId string, data io.Reader, size int64, contentType string) error
-	GetWorks(ctx context.Context, userId int64) (io.ReadCloser, error)
-	DeleteWork(ctx context.Context, userId, workId int64) error
+	UploadWork(ctx context.Context, userId int64, data io.Reader, size int64, contentType string) (string, error)
+	GetWorks(ctx context.Context, userId int64) ([]string, error)
+	GetWork(ctx context.Context, userId int64, workId string) (io.ReadCloser, error)
+	DeleteWork(ctx context.Context, userId int64, workId string) error
 }
 
 type Appointments interface {

@@ -3,6 +3,7 @@ package minio_client
 import (
 	"context"
 	"io"
+	"strings"
 
 	"fmt"
 
@@ -70,9 +71,15 @@ func (m *MinioClient) GetAvatar(userId int64) (io.ReadCloser, error) {
 	return m.DownloadFile(bucket, key)
 }
 
-func (m *MinioClient) UploadWork(userId, workId int64, reader io.Reader, size int64, contentType string) error {
+func (m *MinioClient) GetWork(userId int64, workId string) (io.ReadCloser, error) {
 	bucket := "works"
-	key := fmt.Sprint(userId) + "/" + fmt.Sprint(workId) + ".png"
+	key := fmt.Sprintf("%d/%s", userId, workId)
+	return m.DownloadFile(bucket, key)
+}
+
+func (m *MinioClient) UploadWork(userId int64, workId string, reader io.Reader, size int64, contentType string) error {
+	bucket := "works"
+	key := fmt.Sprintf("%d/%s", userId, workId)
 
 	if err := m.CreateBucket(bucket, "minio"); err != nil {
 		return err
@@ -86,7 +93,7 @@ type WorkFile struct {
 	Content io.ReadCloser
 }
 
-func (m *MinioClient) GetWorks(userId int64) ([]WorkFile, error) {
+func (m *MinioClient) GetWorksIDs(userId int64) ([]string, error) {
 	bucket := "works"
 	prefix := fmt.Sprintf("%d/", userId)
 
@@ -95,25 +102,25 @@ func (m *MinioClient) GetWorks(userId int64) ([]WorkFile, error) {
 
 	objectCh := m.client.ListObjects(bucket, prefix, true, doneCh)
 
-	var files []WorkFile
+	var ids []string
 
 	for object := range objectCh {
 		if object.Err != nil {
 			return nil, fmt.Errorf("error listing object: %w", object.Err)
 		}
+		parts := strings.Split(object.Key, "/")
+		fileName := parts[len(parts)-1]
 
-		obj, err := m.client.GetObject(bucket, object.Key, minio.GetObjectOptions{})
-		if err != nil {
-			return nil, fmt.Errorf("error getting object %s: %w", object.Key, err)
+		dotIndex := strings.LastIndex(fileName, ".")
+		id := fileName
+		if dotIndex != -1 {
+			id = fileName[:dotIndex]
 		}
 
-		files = append(files, WorkFile{
-			Name:    object.Key,
-			Content: obj,
-		})
+		ids = append(ids, id)
 	}
 
-	return files, nil
+	return ids, nil
 }
 
 func (m *MinioClient) deleteObject(bucket, key string) error {
@@ -130,8 +137,8 @@ func (m *MinioClient) DeleteAvatar(userId int64) error {
 	return m.deleteObject(bucket, key)
 }
 
-func (m *MinioClient) DeleteWork(userId, workId int64) error {
+func (m *MinioClient) DeleteWork(userId int64, workId string) error {
 	bucket := "works"
-	key := fmt.Sprintf("%d/%d.jpg", userId, workId)
+	key := fmt.Sprintf("%d/%s", userId, workId)
 	return m.deleteObject(bucket, key)
 }

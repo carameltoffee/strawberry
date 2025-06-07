@@ -25,6 +25,12 @@ type Config struct {
 	RabbitMq struct {
 		Uri string `envconfig:"RABBITMQ_URL" default:"amqp://guest:guest@rabbitmq:5672/"`
 	}
+	Minio struct {
+		AccessKey string `envconfig:"MINIO_ROOT_USER" required:"true"`
+		SecretKey string `envconfig:"MINIO_ROOT_PASSWORD" required:"true"`
+		SslMode   bool   `envconfig:"MINIO_SSLMODE" default:"false"`
+		Port      int    `envconfig:"MINIO_PORT" default:"9000"`
+	}
 }
 
 func MustLoad() Config {
