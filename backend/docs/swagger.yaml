@@ -349,6 +349,33 @@ paths:
       summary: Get master by username
       tags:
       - masters
+  /masters/works/{id}:
+    delete:
+      description: Deletes a work slot belonging to the authenticated master
+      parameters:
+      - description: Work ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete master work slot
+      tags:
+      - master
   /register:
     post:
       consumes:
@@ -549,6 +576,164 @@ paths:
       summary: Set working slots for master
       tags:
       - schedule
+  /users/{id}/avatar:
+    get:
+      description: Returns the avatar image file for the given user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: invalid id
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: something went wrong
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get user's avatar
+      tags:
+      - avatar
+  /users/{id}/works:
+    get:
+      description: Returns list of work IDs uploaded by the master
+      parameters:
+      - description: Master ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get master work IDs
+      tags:
+      - master
+  /users/{id}/works/{workId}:
+    get:
+      description: Returns a specific work file uploaded by the master
+      parameters:
+      - description: Master ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Work ID
+        in: path
+        name: workId
+        required: true
+        type: string
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get master work file
+      tags:
+      - master
+  /users/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads and stores the avatar image for the authorized user
+      parameters:
+      - description: Avatar file
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: can't find or open file
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: can't upload file to our server
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload user's avatar
+      tags:
+      - avatar
+  /users/works:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file (e.g. image) representing master's work
+      parameters:
+      - description: Work file
+        in: formData
+        name: work
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload master's work
+      tags:
+      - master
 securityDefinitions:
   BearerAuth:
     in: header
