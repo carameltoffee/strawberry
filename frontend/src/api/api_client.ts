@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080/api";
+export const API_BASE = "http://localhost:8080/api";
 
 export interface ErrorResponse {
      error: string;
@@ -111,6 +111,42 @@ async function request<T>(
      }
 }
 
+async function requestFormData<T>(
+     method: string,
+     path: string,
+     token: string,
+     formData: FormData
+): Promise<T> {
+     const res = await fetch(`${API_BASE}${path}`, {
+          method,
+          headers: {
+               ...(token ? { Authorization: `Bearer ${token}` } : {}),
+               // Content-Type не ставим, браузер сам выставит для multipart/form-data
+          },
+          body: formData,
+     });
+
+     if (!res.ok) {
+          let errText = res.statusText;
+          try {
+               const errData = await res.json();
+               if (errData?.error) errText = errData.error;
+          } catch { }
+          throw new Error(errText);
+     }
+
+     const contentLength = res.headers.get("Content-Length");
+
+     if (res.status === 204 || !contentLength || contentLength === "0") {
+          return undefined as unknown as T;
+     }
+
+     try {
+          return await res.json();
+     } catch {
+          return undefined as unknown as T;
+     }
+}
 
 export const api = {
      login(input: LoginReq): Promise<LoginRes> {
@@ -167,5 +203,54 @@ export const api = {
      getSchedule(token: string, id: number, date: string): Promise<Schedule> {
           const params = new URLSearchParams({ date });
           return request("GET", `/schedule/${id}?${params.toString()}`, token);
+     },
+     async getUserAvatar(id: number): Promise<Blob> {
+          const res = await fetch(`${API_BASE}/users/${id}/avatar`, {
+               method: "GET",
+          });
+          if (!res.ok) {
+               let errText = res.statusText;
+               try {
+                    const errData = await res.json();
+                    if (errData?.error) errText = errData.error;
+               } catch { }
+               throw new Error(errText);
+          }
+          return await res.blob();
+     },
+
+     async uploadUserAvatar(token: string, file: File): Promise<void> {
+          const formData = new FormData();
+          formData.append("avatar", file);
+          return requestFormData<void>("POST", "/users/avatar", token, formData);
+     },
+
+     async uploadUserWork(token: string, file: File): Promise<string> {
+          const formData = new FormData();
+          formData.append("work", file);
+          return requestFormData<string>("POST", "/users/works", token, formData);
+     },
+
+     async deleteUserWork(token: string, workId: string): Promise<void> {
+          return request<void>("DELETE", `/masters/works/${workId}`, token);
+     },
+
+     async getUserWorkIds(id: number): Promise<string[]> {
+          return request("GET", `/users/${id}/works`);
+     },
+
+     async getUserWorkFile(id: number, workId: string): Promise<Blob> {
+          const res = await fetch(`${API_BASE}/users/${id}/works/${encodeURIComponent(workId)}`, {
+               method: "GET",
+          });
+          if (!res.ok) {
+               let errText = res.statusText;
+               try {
+                    const errData = await res.json();
+                    if (errData?.error) errText = errData.error;
+               } catch { }
+               throw new Error(errText);
+          }
+          return await res.blob();
      },
 };
