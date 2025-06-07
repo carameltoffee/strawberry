@@ -38,10 +38,19 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		api.GET("/masters/:username", h.GetMasterByUsername)
 		api.GET("/users/:id", h.GetMasterById)
 
+		api.GET("/users/:id/works", h.GetMasterWorks)
+		api.GET("/users/:id/works/:workId", h.GetMasterWork)
+
+		api.GET("/users/:id/avatar", h.GetAvatar)
+
 		api.GET("schedule/:id", h.GetSchedule)
 		auth := api.Group("/")
 		auth.Use(h.authMiddleware())
 		{
+			auth.POST("users/works", h.UploadMasterWork)
+			auth.POST("/users/avatar", h.UploadAvatar)
+			auth.DELETE("masters/works/:id", h.DeleteMasterWork)
+			// auth.DELETE("/users/avatar", h.DeleteAvatar)
 			auth.GET("/appointments", h.GetAppointments)
 			auth.POST("/appointments", h.CreateAppointment)
 			auth.DELETE("/appointments/:id", h.DeleteAppointment)
