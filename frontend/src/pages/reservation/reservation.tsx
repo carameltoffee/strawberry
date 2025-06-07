@@ -3,7 +3,9 @@ import { useParams } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import styles from "./reservation.module.css";
-import { api, type User } from "../../api/api_client";
+import { api, API_BASE, type User } from "../../api/api_client";
+import Notification from "../../components/notification/notification";
+import WorksSlider from "../../components/img_slider/img_slider";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -22,6 +24,7 @@ const getLocalDateString = (date: Date) => {
 };
 
 const Reservation: React.FC = () => {
+     const [works, setWorks] = useState<string[]>([]);
      const { id } = useParams<{ id: string }>();
      const masterId = id ? Number(id) : NaN;
      const [master, setMaster] = useState<User | null>(null);
@@ -29,12 +32,39 @@ const Reservation: React.FC = () => {
      const [date, setDate] = useState<Date | null>(new Date());
      const [schedule, setSchedule] = useState<TodaySchedule | null>(null);
      const [loadingSchedule, setLoadingSchedule] = useState(false);
+     const [notification, setNotification] = useState<{
+          message: string;
+          type: "success" | "error";
+     } | null>(null);
+
+     const showSuccess = (message: string) => setNotification({ message, type: "success" });
+     const showError = (err: unknown) => {
+          const message = err instanceof Error ? err.message : "Неизвестная ошибка";
+          setNotification({ message, type: "error" });
+     };
 
      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
      if (!id || isNaN(masterId)) {
           return <div>Ошибка: неверный или отсутствующий мастер ID в URL</div>;
      }
+
+     useEffect(() => {
+          async function fetchWorks() {
+               try {
+                    const w = await api.getUserWorkIds(masterId);
+                    setWorks(w);
+               } catch (err) {
+                    showError(err);
+                    setWorks([]);
+               }
+          }
+
+          if (!isNaN(masterId)) {
+               fetchWorks();
+          }
+     }, [masterId]);
+
 
      useEffect(() => {
           async function fetchMaster() {
@@ -44,7 +74,7 @@ const Reservation: React.FC = () => {
                     const m = await api.getMasterById(masterId);
                     setMaster(m);
                } catch (err) {
-                    console.error("Ошибка загрузки мастера:", err);
+                    showError(err);
                     setMaster(null);
                } finally {
                     setLoadingMaster(false);
@@ -66,7 +96,7 @@ const Reservation: React.FC = () => {
 
 
      const handleBookTime = async (time: string) => {
-          if (!token) return alert("Please log in first");
+          if (!token) return showError("Зарегестрируйтесь, чтобы записаться");
           if (!date) return;
 
           const dateStr = getLocalDateString(date);
@@ -77,7 +107,7 @@ const Reservation: React.FC = () => {
                     master_id: masterId,
                     time: datetime,
                });
-               alert("Appointment created. ID: " + res.id);
+               showSuccess(`Создана запись с кодом: ${res.id}`)
                fetchSchedule(date);
           } catch (err: any) {
                alert("Failed to book: " + err.message);
@@ -165,11 +195,24 @@ const Reservation: React.FC = () => {
                               {typeof master.average_rating === "number" && (
                                    <p>Рейтинг: {master.average_rating.toFixed(1)}</p>
                               )}
+                              {Array.isArray(works) && works.length > 0 && (
+                                   <div className={styles.worksSection}>
+                                        <WorksSlider works={works} master={master} API_BASE={API_BASE} />
+                                   </div>
+                              )}
                          </div>
                     ) : (
                          <p>Не удалось загрузить информацию о мастере.</p>
                     )}
                </div>
+
+               {notification && (
+                    <Notification
+                         message={notification.message}
+                         type={notification.type}
+                         onClose={() => setNotification(null)}
+                    />
+               )}
 
           </div>
      );

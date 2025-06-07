@@ -48,6 +48,11 @@
      gap: 0.5rem;
 }
 
+.rightSide p {
+     margin-top: 0 !important;
+     margin-bottom: 0.3em !important;
+}
+
 .timeButton {
      padding: 0.5rem 1rem;
      font-size: 15px;
