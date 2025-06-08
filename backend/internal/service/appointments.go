@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strawberry/internal/models"
 	"strawberry/internal/repository"
 	"strawberry/pkg/helper"
 	"strawberry/pkg/logger"
+	"strawberry/pkg/mail"
 	"strawberry/pkg/rabbitmq"
 	"time"
 
@@ -16,14 +18,16 @@ import (
 )
 
 type AppointmentsService struct {
-	r   *repository.Repository
-	rmq *rabbitmq.MQConnection
+	r    *repository.Repository
+	rmq  *rabbitmq.MQConnection
+	mail mail.MailClient
 }
 
-func newAppointmentsService(r *repository.Repository, rmq *rabbitmq.MQConnection) Appointments {
+func newAppointmentsService(r *repository.Repository, rmq *rabbitmq.MQConnection, mail mail.MailClient) Appointments {
 	return &AppointmentsService{
-		r:   r,
-		rmq: rmq,
+		r:    r,
+		rmq:  rmq,
+		mail: mail,
 	}
 }
 
@@ -156,7 +160,7 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 		return ErrInternal
 	}
 
-	if a.UserID != userId {
+	if a.UserID != userId && a.MasterID != userId {
 		l.Warn("unauthorized", zap.Int64("user_id", userId))
 		return ErrUnauthorized
 	}
@@ -173,6 +177,22 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 
 	if err := s.publishAppointmentDeleted(ctx, id, a); err != nil {
 		l.Error("failed to publish appointment.deleted", zap.Error(err))
+	}
+
+	us, err := s.r.Users.GetById(ctx, a.UserID)
+	if err != nil {
+		l.Error("failed to get user", zap.Error(err))
+		return ErrInternal
+	}
+	master, err := s.r.Users.GetById(ctx, a.MasterID)
+	if err != nil {
+		l.Error("failed to get master", zap.Error(err))
+		return ErrInternal
+	}
+
+	msg := fmt.Sprintf("Похоже что %s отменил(а) вашу запись в %s...Попробуете записаться в другое время?", master.FullName, a.ScheduledAt.Format("2006-01-02 15:04"))
+	if err := s.mail.Send(us.Email, "вашу запись отменили :(", msg); err != nil {
+		l.Error("failed to send mail", zap.Error(err))
 	}
 
 	return nil

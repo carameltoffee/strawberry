@@ -7,6 +7,7 @@ import (
 	"strawberry/internal/repository"
 	hasher "strawberry/pkg/hash"
 	"strawberry/pkg/jwt"
+	"strawberry/pkg/mail"
 	minio_client "strawberry/pkg/minio"
 	"strawberry/pkg/rabbitmq"
 	"time"
@@ -65,12 +66,13 @@ type Deps struct {
 	JwtMgr     jwt.JwtManager
 	Hasher     *hasher.Hasher
 	Minio      *minio_client.MinioClient
+	MailClient mail.MailClient
 }
 
 func New(d *Deps) *Service {
 	return &Service{
 		Users:        newUsersService(d.Repository, d.JwtMgr, d.Hasher),
-		Appointments: newAppointmentsService(d.Repository, d.RabbitMq),
+		Appointments: newAppointmentsService(d.Repository, d.RabbitMq, d.MailClient),
 		Schedules:    newSchedulesService(d.Repository),
 		File:         newFileService(d.Minio),
 	}
