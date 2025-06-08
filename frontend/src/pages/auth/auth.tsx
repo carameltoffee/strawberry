@@ -16,7 +16,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
      const createInitialForm = (): LoginReq | RegisterReq => {
           return mode === "login"
                ? { username: "", password: "" }
-               : { username: "", password: "", full_name: "", specialization: "" };
+               : { username: "", password: "", full_name: "", specialization: "", email: "" };
      };
 
      const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +75,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                               name="full_name"
                               placeholder="Полное имя"
                               value={(form as RegisterReq).full_name}
+                              onChange={handleChange}
+                         />
+                         <input
+                              type="email"
+                              name="email"
+                              placeholder="Email"
+                              value={(form as RegisterReq).email}
                               onChange={handleChange}
                          />
 
