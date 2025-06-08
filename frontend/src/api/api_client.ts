@@ -16,6 +16,7 @@ export interface LoginRes {
 export interface RegisterReq {
      full_name: string;
      username: string;
+     email: string;
      password: string;
      specialization?: string;
 }
