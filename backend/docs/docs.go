@@ -304,6 +304,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/masters/appointments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all appointments for the currently authenticated master",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "appointments"
+                ],
+                "summary": "Get master's appointments",
+                "responses": {
+                    "200": {
+                        "description": "List of appointments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Appointment"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/masters/works/{id}": {
             "delete": {
                 "security": [
@@ -1005,6 +1045,9 @@ const docTemplate = `{
         "handlers.RegisterReq": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "full_name": {
                     "type": "string"
                 },
