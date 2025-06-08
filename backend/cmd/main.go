@@ -13,6 +13,7 @@ import (
 	hasher "strawberry/pkg/hash"
 	"strawberry/pkg/jwt"
 	"strawberry/pkg/logger"
+	"strawberry/pkg/mail"
 	minio_client "strawberry/pkg/minio"
 	db "strawberry/pkg/postgres"
 	"strawberry/pkg/rabbitmq"
@@ -60,12 +61,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer rmq.Close()
 	svc := service.New(&service.Deps{
 		Repository: repo,
 		JwtMgr:     jwtMgr,
 		Hasher:     hasher.New(),
 		RabbitMq:   rmq,
 		Minio:      minio,
+		MailClient: mail.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Username),
 	})
 
 	h := handlers.New(svc, jwtMgr)
