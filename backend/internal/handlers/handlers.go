@@ -47,6 +47,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth := api.Group("/")
 		auth.Use(h.authMiddleware())
 		{
+			auth.GET("/masters/appointments", h.GetMasterAppointments)
 			auth.POST("users/works", h.UploadMasterWork)
 			auth.POST("/users/avatar", h.UploadAvatar)
 			auth.DELETE("masters/works/:id", h.DeleteMasterWork)

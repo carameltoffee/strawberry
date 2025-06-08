@@ -12,6 +12,7 @@ import (
 type RegisterReq struct {
 	FullName       string `json:"full_name"`
 	Username       string `json:"username"`
+	Email          string `json:"email"`
 	Password       string `json:"password"`
 	Specialization string `json:"specialization"`
 }
@@ -42,6 +43,7 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 	user := &models.User{
 		FullName:       data.FullName,
+		Email:          data.Email,
 		Username:       data.Username,
 		Password:       data.Password,
 		Specialization: data.Specialization,

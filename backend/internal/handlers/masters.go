@@ -313,3 +313,27 @@ func (h *Handler) DeleteMasterWork(c *gin.Context) {
 	}
 	c.Status(http.StatusOK)
 }
+
+// GetMasterAppointments godoc
+// @Summary      Get master's appointments
+// @Description  Returns all appointments for the currently authenticated master
+// @Tags         appointments
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {array}  models.Appointment  "List of appointments"
+// @Failure      401  {object}  ErrorResponse       "Unauthorized"
+// @Failure      500  {object}  ErrorResponse       "Internal Server Error"
+// @Router       /masters/appointments [get]
+func (h *Handler) GetMasterAppointments(c *gin.Context) {
+	claims, ok := getClaims(c)
+	if !ok {
+		newErrorResponse(http.StatusUnauthorized, "unauthorized", c)
+		return
+	}
+	appointments, err := h.s.Appointments.GetByMasterId(c.Request.Context(), claims.Id)
+	if err != nil {
+		newErrorResponse(http.StatusInternalServerError, "cannot get appointments", c)
+		return
+	}
+	c.JSON(http.StatusOK, appointments)
+}
