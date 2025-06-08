@@ -31,6 +31,12 @@ type Config struct {
 		SslMode   bool   `envconfig:"MINIO_SSLMODE" default:"false"`
 		Port      int    `envconfig:"MINIO_PORT" default:"9000"`
 	}
+	Smtp struct {
+		Host     string `envconfig:"SMTP_HOST" required:"true"`
+		Port     int    `envconfig:"SMTP_PORT" default:"587"`
+		Username string `envconfig:"SMTP_USERNAME" required:"true"`
+		Password string `envconfig:"SMTP_PASSWORD" required:"true"`
+	}
 }
 
 func MustLoad() Config {
