@@ -12,6 +12,15 @@ definitions:
       id:
         type: integer
     type: object
+  handlers.CreateReviewReq:
+    properties:
+      comment:
+        type: string
+      master_id:
+        type: integer
+      rating:
+        type: integer
+    type: object
   handlers.ErrorResponse:
     properties:
       error:
@@ -31,6 +40,8 @@ definitions:
     type: object
   handlers.RegisterReq:
     properties:
+      code:
+        type: string
       email:
         type: string
       full_name:
@@ -46,6 +57,11 @@ definitions:
     properties:
       id:
         type: integer
+    type: object
+  handlers.SendVerificationCodeReq:
+    properties:
+      email:
+        type: string
     type: object
   handlers.SetWorkingSlotsReq:
     properties:
@@ -92,6 +108,23 @@ definitions:
       scheduled_at:
         type: string
       status:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.Review:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      master_id:
+        type: integer
+      rating:
+        type: integer
+      updated_at:
         type: string
       user_id:
         type: integer
@@ -426,6 +459,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "409":
           description: Conflict
           schema:
@@ -437,6 +474,148 @@ paths:
       summary: Register a new user or master
       tags:
       - auth
+  /reviews:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные отзыва
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateReviewReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Review'
+        "400":
+          description: Неверные данные запроса
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создать отзыв
+      tags:
+      - reviews
+  /reviews/{id}:
+    delete:
+      description: Удаляет отзыв пользователя по ID
+      parameters:
+      - description: ID отзыва
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Отзыв удалён
+        "400":
+          description: Неверный ID отзыва
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Отзыв не найден
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удалить отзыв
+      tags:
+      - reviews
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующий отзыв пользователя
+      parameters:
+      - description: ID отзыва
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные отзыва
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/models.Review'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Review'
+        "400":
+          description: Неверные данные или ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Отзыв не найден
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновить отзыв
+      tags:
+      - reviews
+  /reviews/master/{master_id}:
+    get:
+      parameters:
+      - description: ID мастера
+        in: path
+        name: master_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Review'
+            type: array
+        "400":
+          description: Неверный ID мастера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Получить отзывы мастера
+      tags:
+      - reviews
   /schedule/{id}:
     get:
       description: Get working schedule slots for the current user for today
@@ -603,6 +782,36 @@ paths:
       summary: Set working slots for master
       tags:
       - schedule
+  /send-code:
+    post:
+      consumes:
+      - application/json
+      description: Sends a verification code to the provided email address
+      parameters:
+      - description: Email input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SendVerificationCodeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Invalid email format
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Could not send code
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Send verification code
+      tags:
+      - auth
   /users/{id}/avatar:
     get:
       description: Returns the avatar image file for the given user ID
