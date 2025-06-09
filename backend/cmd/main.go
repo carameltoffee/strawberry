@@ -17,6 +17,7 @@ import (
 	minio_client "strawberry/pkg/minio"
 	db "strawberry/pkg/postgres"
 	"strawberry/pkg/rabbitmq"
+	"strawberry/pkg/redis"
 	"syscall"
 	"time"
 
@@ -50,8 +51,12 @@ func main() {
 	defer pool.Close()
 
 	jwtMgr := jwt.NewJwtManagerKeyTTL(cfg.Jwt.SecretKey, cfg.Jwt.TTL)
+	redis, err := redis.New(fmt.Sprintf("%s:%d", cfg.Redis.Addr, cfg.Redis.Port), cfg.Redis.Password, 0)
+	if err != nil {
+		panic(err)
+	}
 
-	repo := repository.New(pool)
+	repo := repository.New(pool, redis)
 	minio, err := minio_client.New(fmt.Sprintf("minio:%d", cfg.Minio.Port), cfg.Minio.AccessKey,
 		cfg.Minio.SecretKey, cfg.Minio.SslMode)
 	if err != nil {
