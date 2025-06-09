@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot
 from aio_pika import connect_robust, ExchangeType, IncomingMessage
 from db.db import store  
+from utils.utils import format_time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,19 +32,24 @@ async def on_message(message: IncomingMessage, bot: Bot):
             if routing_key == "appointments.created":
                 text = (f"Новая запись:\n"
                         f"ID: {payload.get('appointment_id')}\n"
-                        f"Время: {payload.get('time')}")
+                        f"Время: {format_time(payload.get('time'))}")
             elif routing_key == "appointments.deleted":
                 text = (f"Запись отменена:\n"
                         f"ID: {payload.get('appointment_id')}\n"
-                        f"Время: {payload.get('time')}")
+                        f"Время: {format_time(payload.get('time'))}")
+            elif routing_key == "reviews.created":
+                text = (f"Новый отзыв от пользователя {payload.get('user_id')}:\n"
+                        f"Оценка: {payload.get('rating')}/5\n"
+                        f"Комментарий: {payload.get('message')}")
             else:
-                text = payload.get("text", "Новое уведомление о записи")
+                text = payload.get("text", "Новое уведомление")
 
             logger.info(f"Sending message to telegram_id={telegram_id}: {text}")
             await send_telegram_message(bot, telegram_id, text)
 
         except Exception:
             logger.exception("Ошибка при обработке сообщения")
+
 
 async def run_consumer(url: str, ex_name: str, routing_keys: list[str], bot: Bot):
     logger.info("Connecting to RabbitMQ")
