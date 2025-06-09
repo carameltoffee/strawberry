@@ -30,6 +30,9 @@ async def main():
     
     run_bot_consumer(bot, os.getenv("RABBITMQ_URL"), os.getenv("EXCHANGE_NAME"), 
                     routing_keys=["appointments.created", "appointments.deleted"])
+    
+    run_bot_consumer(bot, os.getenv("RABBITMQ_URL"), os.getenv("EXCHANGE_NAME_2"),
+                    routing_keys=["reviews.created"])
 
     days_off_router = create_days_off_router(api_client)
     schedule_router = create_schedule_router(api_client, jwt_decoder)
