@@ -31,6 +31,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	api := r.Group("api")
 	{
 
+		api.POST("/send-code", h.SendVerificationCode)
+
 		api.POST("/register", h.Register)
 		api.POST("/login", h.Login)
 
@@ -42,11 +44,18 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		api.GET("/users/:id/works/:workId", h.GetMasterWork)
 
 		api.GET("/users/:id/avatar", h.GetAvatar)
+		api.GET("/reviews/master/:master_id", h.GetReviewsByMasterId)
 
 		api.GET("schedule/:id", h.GetSchedule)
 		auth := api.Group("/")
 		auth.Use(h.authMiddleware())
 		{
+			reviews := auth.Group("/reviews")
+			{
+				reviews.POST("/", h.CreateReview)
+				reviews.PUT("/:id", h.UpdateReview)
+				reviews.DELETE("/:id", h.DeleteReview)
+			}
 			auth.GET("/masters/appointments", h.GetMasterAppointments)
 			auth.POST("users/works", h.UploadMasterWork)
 			auth.POST("/users/avatar", h.UploadAvatar)

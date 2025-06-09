@@ -15,6 +15,7 @@ type RegisterReq struct {
 	Email          string `json:"email"`
 	Password       string `json:"password"`
 	Specialization string `json:"specialization"`
+	Code           string `json:"code"`
 }
 
 type RegisterRes struct {
@@ -30,12 +31,18 @@ type RegisterRes struct {
 // @Success 201 {object} RegisterRes
 // @Failure 400 {object} ErrorResponse
 // @Failure 409 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /register [post]
 func (h *Handler) Register(c *gin.Context) {
 	var data *RegisterReq
 	if err := c.ShouldBindBodyWithJSON(&data); err != nil {
 		newErrorResponse(http.StatusBadRequest, "invalid data", c)
+		return
+	}
+	err := h.s.VerificationCode.VerifyCode(c.Request.Context(), data.Email, data.Code)
+	if err != nil {
+		newErrorResponse(http.StatusUnauthorized, "invalid code", c)
 		return
 	}
 	if data.Specialization == "" {
