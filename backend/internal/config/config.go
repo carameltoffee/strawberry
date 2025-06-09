@@ -37,6 +37,14 @@ type Config struct {
 		Username string `envconfig:"SMTP_USERNAME" required:"true"`
 		Password string `envconfig:"SMTP_PASSWORD" required:"true"`
 	}
+	Redis struct {
+		Addr     string `envconfig:"REDIS_HOST" default:"redis"`
+		Password string `envconfig:"REDIS_PASSWORD" required:"true"`
+		Port       int    `envconfig:"REDIS_PORT" default:"6379"`
+	}
+	Verification struct {
+		TTL time.Duration `envconfig:"VERIFICATION_TTL" default:"10m"`
+	}
 }
 
 func MustLoad() Config {
