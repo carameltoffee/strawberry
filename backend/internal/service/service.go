@@ -18,6 +18,8 @@ type Service struct {
 	Appointments
 	Schedules
 	File
+	Reviews
+	VerificationCode
 }
 
 type Schedules interface {
@@ -60,20 +62,35 @@ type Appointments interface {
 	GetByStatus(ctx context.Context, status string) ([]models.Appointment, error)
 }
 
+type Reviews interface {
+	Create(ctx context.Context, r *models.Review) error
+	Update(ctx context.Context, r *models.Review) error
+	GetByMasterId(ctx context.Context, masterId int64) ([]models.Review, error)
+	Delete(ctx context.Context, userId, id int64) error
+}
+
+type VerificationCode interface {
+	SendCode(ctx context.Context, email string) (string, error)
+	VerifyCode(ctx context.Context, email, inputCode string) error
+}
+
 type Deps struct {
-	Repository *repository.Repository
-	RabbitMq   *rabbitmq.MQConnection
-	JwtMgr     jwt.JwtManager
-	Hasher     *hasher.Hasher
-	Minio      *minio_client.MinioClient
-	MailClient mail.MailClient
+	Repository      *repository.Repository
+	RabbitMq        *rabbitmq.MQConnection
+	JwtMgr          jwt.JwtManager
+	Hasher          *hasher.Hasher
+	Minio           *minio_client.MinioClient
+	MailClient      mail.MailClient
+	VerificationTTL time.Duration
 }
 
 func New(d *Deps) *Service {
 	return &Service{
-		Users:        newUsersService(d.Repository, d.JwtMgr, d.Hasher),
-		Appointments: newAppointmentsService(d.Repository, d.RabbitMq, d.MailClient),
-		Schedules:    newSchedulesService(d.Repository),
-		File:         newFileService(d.Minio),
+		Users:            newUsersService(d.Repository, d.JwtMgr, d.Hasher),
+		Appointments:     newAppointmentsService(d.Repository, d.RabbitMq, d.MailClient),
+		Schedules:        newSchedulesService(d.Repository),
+		File:             newFileService(d.Minio),
+		Reviews:          newReviewsService(d.Repository, d.RabbitMq),
+		VerificationCode: newVerificationCodeService(d.Repository, d.MailClient, d.VerificationTTL),
 	}
 }
