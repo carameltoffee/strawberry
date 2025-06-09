@@ -61,9 +61,15 @@ func (s *AppointmentsService) Create(ctx context.Context, a *models.Appointment)
 		}
 	}
 
-	if err := s.publishAppointmentCreated(ctx, id, a); err != nil {
-		l.Error("failed to publish appointment.created", zap.Error(err))
-	}
+	go func(id int64, a *models.Appointment) {
+		bgCtx := context.Background()
+		bgCtx = logger.WithLogger(bgCtx)
+		bgLog := logger.FromContext(bgCtx)
+
+		if err := s.publishAppointmentCreated(bgCtx, id, a); err != nil {
+			bgLog.Error("cannot publish appointment to rmq (async)", zap.Error(err))
+		}
+	}(id, a)
 
 	return id, nil
 }
@@ -175,9 +181,15 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 		return ErrInternal
 	}
 
-	if err := s.publishAppointmentDeleted(ctx, id, a); err != nil {
-		l.Error("failed to publish appointment.deleted", zap.Error(err))
-	}
+	go func(id int64, a *models.Appointment) {
+		bgCtx := context.Background()
+		bgCtx = logger.WithLogger(bgCtx)
+		bgLog := logger.FromContext(bgCtx)
+
+		if err := s.publishAppointmentDeleted(bgCtx, id, a); err != nil {
+			bgLog.Error("cannot publish appointment to rmq (async)", zap.Error(err))
+		}
+	}(id, a)
 
 	us, err := s.r.Users.GetById(ctx, a.UserID)
 	if err != nil {
@@ -191,9 +203,16 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 	}
 
 	msg := fmt.Sprintf("Похоже что %s отменил(а) вашу запись в %s...Попробуете записаться в другое время?", master.FullName, a.ScheduledAt.Format("2006-01-02 15:04"))
-	if err := s.mail.Send(us.Email, "вашу запись отменили :(", msg); err != nil {
-		l.Error("failed to send mail", zap.Error(err))
-	}
+	
+	go func() {
+		bgCtx := context.Background()
+		bgCtx = logger.WithLogger(bgCtx)
+		bgLog := logger.FromContext(bgCtx)
+
+		if err := s.mail.Send(us.Email, "вашу запись отменили :(", msg); err != nil {
+			bgLog.Error("failed to send mail", zap.Error(err))
+		}
+	}()
 
 	return nil
 }
