@@ -22,13 +22,13 @@ func newPostgresUsersRepository(db *pgxpool.Pool) Users {
 
 func (r *postgresUsersRepository) Create(ctx context.Context, us *models.User) (int64, error) {
 	query := `
-		INSERT INTO users (full_name, username, password, email, average_rating, specialization)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO users (full_name, username, password, email, specialization)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id;
 	`
 	var id int64
 	err := r.db.QueryRow(ctx, query,
-		us.FullName, us.Username, us.Password, us.Email, us.AverageRating, us.Specialization).Scan(&id)
+		us.FullName, us.Username, us.Password, us.Email, us.Specialization).Scan(&id)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
@@ -42,11 +42,11 @@ func (r *postgresUsersRepository) Create(ctx context.Context, us *models.User) (
 func (r *postgresUsersRepository) Update(ctx context.Context, us *models.User) error {
 	query := `
 		UPDATE users 
-		SET full_name = $1, username = $2, password = $3, email = $4, average_rating = $5, specialization = $6
-		WHERE id = $7;
+		SET full_name = $1, username = $2, password = $3, email = $4, specialization = $5
+		WHERE id = $6;
 	`
 	cmdTag, err := r.db.Exec(ctx, query,
-		us.FullName, us.Username, us.Password, us.Email, us.AverageRating, us.Specialization, us.Id)
+		us.FullName, us.Username, us.Password, us.Email, us.Specialization, us.Id)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (r *postgresUsersRepository) Delete(ctx context.Context, id int64) error {
 
 func (r *postgresUsersRepository) GetByFullName(ctx context.Context, fn string) ([]models.User, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, full_name, username, password, email, registered_at, average_rating, specialization
+		SELECT id, full_name, username, password, email, registered_at, specialization
 		FROM users WHERE full_name = $1;
 	`, fn)
 	if err != nil {
@@ -80,7 +80,7 @@ func (r *postgresUsersRepository) GetByFullName(ctx context.Context, fn string) 
 	var users []models.User
 	for rows.Next() {
 		var u models.User
-		if err := rows.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.AverageRating, &u.Specialization); err != nil {
+		if err := rows.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.Specialization); err != nil {
 			return nil, err
 		}
 		users = append(users, u)
@@ -93,12 +93,12 @@ func (r *postgresUsersRepository) GetByFullName(ctx context.Context, fn string) 
 
 func (r *postgresUsersRepository) GetByUsername(ctx context.Context, un string) (*models.User, error) {
 	row := r.db.QueryRow(ctx, `
-		SELECT id, full_name, username, password, email, registered_at, average_rating, specialization
+		SELECT id, full_name, username, password, email, registered_at, specialization
 		FROM users WHERE username = $1;
 	`, un)
 
 	var u models.User
-	err := row.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.AverageRating, &u.Specialization)
+	err := row.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.Specialization)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrNoUsers
 	}
@@ -110,9 +110,8 @@ func (r *postgresUsersRepository) GetByUsername(ctx context.Context, un string) 
 
 func (r *postgresUsersRepository) GetMastersByRating(ctx context.Context) ([]models.User, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, full_name, username, password, email, registered_at, average_rating, specialization
-		FROM users WHERE specialization != 'user'
-		ORDER BY average_rating DESC;
+		SELECT id, full_name, username, password, email, registered_at, specialization
+		FROM users WHERE specialization != 'user';
 	`)
 	if err != nil {
 		return nil, err
@@ -122,7 +121,7 @@ func (r *postgresUsersRepository) GetMastersByRating(ctx context.Context) ([]mod
 	var users []models.User
 	for rows.Next() {
 		var u models.User
-		if err := rows.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.AverageRating, &u.Specialization); err != nil {
+		if err := rows.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.Specialization); err != nil {
 			return nil, err
 		}
 		users = append(users, u)
@@ -135,7 +134,7 @@ func (r *postgresUsersRepository) GetMastersByRating(ctx context.Context) ([]mod
 
 func (r *postgresUsersRepository) GetMastersBySpecialization(ctx context.Context, s string) ([]models.User, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, full_name, username, password, email, registered_at, average_rating, specialization
+		SELECT id, full_name, username, password, email, registered_at, specialization
 		FROM users WHERE specialization = $1;
 	`, s)
 	if err != nil {
@@ -146,7 +145,7 @@ func (r *postgresUsersRepository) GetMastersBySpecialization(ctx context.Context
 	var users []models.User
 	for rows.Next() {
 		var u models.User
-		if err := rows.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.AverageRating, &u.Specialization); err != nil {
+		if err := rows.Scan(&u.Id, &u.FullName, &u.Username, &u.Password, &u.Email, &u.RegisteredAt, &u.Specialization); err != nil {
 			return nil, err
 		}
 		users = append(users, u)
@@ -159,12 +158,12 @@ func (r *postgresUsersRepository) GetMastersBySpecialization(ctx context.Context
 
 func (r *postgresUsersRepository) GetById(ctx context.Context, id int64) (*models.User, error) {
 	row := r.db.QueryRow(ctx, `
-		SELECT id, full_name, username, email, registered_at, average_rating, specialization
+		SELECT id, full_name, username, email, registered_at, specialization
 		FROM users WHERE id = $1;
 	`, id)
 
 	var u models.User
-	err := row.Scan(&u.Id, &u.FullName, &u.Username, &u.Email, &u.RegisteredAt, &u.AverageRating, &u.Specialization)
+	err := row.Scan(&u.Id, &u.FullName, &u.Username, &u.Email, &u.RegisteredAt, &u.Specialization)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrNoUsers
 	}

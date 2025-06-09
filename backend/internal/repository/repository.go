@@ -5,6 +5,7 @@ import (
 	"strawberry/internal/models"
 	"time"
 
+	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -12,6 +13,22 @@ type Repository struct {
 	Users
 	Appointments
 	Schedules
+	Reviews
+	VerificationCode
+}
+
+type VerificationCode interface {
+	SetCode(ctx context.Context, email, code string, ttl time.Duration) error
+	GetCode(ctx context.Context, email string) (string, error)
+	DeleteCode(ctx context.Context, email string) error
+}
+
+type Reviews interface {
+	Create(ctx context.Context, r *models.Review) error
+	GetById(ctx context.Context, id int64) (*models.Review, error)
+	GetByMasterId(ctx context.Context, masterId int64) ([]models.Review, error)
+	Update(ctx context.Context, r *models.Review) error
+	Delete(ctx context.Context, id int64) error
 }
 
 type Schedules interface {
@@ -44,10 +61,12 @@ type Appointments interface {
 	GetByStatus(ctx context.Context, status string) ([]models.Appointment, error)
 }
 
-func New(db *pgxpool.Pool) *Repository {
+func New(db *pgxpool.Pool, redis *redis.Client) *Repository {
 	return &Repository{
-		Users:        newPostgresUsersRepository(db),
-		Appointments: newPostgresAppointmentsRepository(db),
-		Schedules:    newPostgresSchedulesRepository(db),
+		Users:            newPostgresUsersRepository(db),
+		Appointments:     newPostgresAppointmentsRepository(db),
+		Schedules:        newPostgresSchedulesRepository(db),
+		Reviews:          newPostgresReviewsRepo(db),
+		VerificationCode: newRedisVerificationCodeRepo(redis),
 	}
 }
