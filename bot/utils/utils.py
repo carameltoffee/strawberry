@@ -19,6 +19,12 @@ def parse_dates(raw_input: str) -> tuple[list, list]:
 
     return valid, invalid
 
+def format_time(time_str: str) -> str:
+    try:
+        dt = datetime.fromisoformat(time_str.replace("Z", "+00:00"))
+        return dt.strftime("%d.%m.%Y в %H:%M")
+    except Exception as e:
+        return time_str
 
 def parse_times(raw_input: str) -> tuple[list, list]:
     raw_times = raw_input.replace('\n', ' ').split()
