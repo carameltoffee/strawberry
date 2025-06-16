@@ -232,12 +232,12 @@ func (h *Handler) UploadMasterWork(c *gin.Context) {
 		return
 	}
 	defer file.Close()
-	_, err = h.s.File.UploadWork(c.Request.Context(), claims.Id, file, fileH.Size, fileH.Header.Get("Content-Type"))
+	id, err := h.s.File.UploadWork(c.Request.Context(), claims.Id, file, fileH.Size, fileH.Header.Get("Content-Type"))
 	if err != nil {
 		newErrorResponse(http.StatusInternalServerError, "can't upload file to server", c)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, &IdResponse{id})
 }
 
 // @Summary Get master work IDs

@@ -13,6 +13,10 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+type IdResponse struct {
+	Id string `json:"id"`
+}
+
 func newErrorResponse(code int, msg string, c *gin.Context) {
 	c.JSON(code, ErrorResponse{
 		Error: msg,

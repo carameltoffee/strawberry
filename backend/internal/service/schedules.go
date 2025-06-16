@@ -121,7 +121,7 @@ func (s *SchedulesService) GetSchedule(ctx context.Context, date string, userId 
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
 
-	day, err := time.Parse(DateFormat, date)
+	day, err := time.ParseInLocation(DateFormat, date, time.Local)
 	if err != nil {
 		return nil, ErrBadDate
 	}
