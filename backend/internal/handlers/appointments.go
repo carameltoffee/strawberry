@@ -75,6 +75,11 @@ func (h *Handler) CreateAppointment(c *gin.Context) {
 	c.JSON(http.StatusCreated, &AppointmentRes{ID: id})
 }
 
+type Appointments struct {
+	MasterAppointments []models.Appointment `json:"master_appointments"`
+	UserAppointments   []models.Appointment `json:"user_appointments"`
+}
+
 // @Summary Get appointments for the authenticated user
 // @Description Get appointments filtered by date and/or status
 // @Tags appointments
@@ -96,13 +101,22 @@ func (h *Handler) GetAppointments(c *gin.Context) {
 	}
 	userId := claims.Id
 
-	appointments, err := h.s.Appointments.GetByUserId(c.Request.Context(), userId)
+	userAppointments, err := h.s.Appointments.GetByUserId(c.Request.Context(), userId)
 	if err != nil {
 		newErrorResponse(http.StatusInternalServerError, "failed to get appointments", c)
 		return
 	}
 
-	c.JSON(http.StatusOK, appointments)
+	masterAppointments, err := h.s.Appointments.GetByMasterId(c.Request.Context(), userId)
+	if err != nil {
+		newErrorResponse(http.StatusInternalServerError, "failed to get appointments", c)
+		return
+	}
+
+	c.JSON(http.StatusOK, &Appointments{
+		MasterAppointments: masterAppointments,
+		UserAppointments:   userAppointments,
+	})
 }
 
 // @Summary Delete an appointment

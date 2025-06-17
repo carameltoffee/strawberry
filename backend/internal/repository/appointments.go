@@ -121,7 +121,7 @@ func (r *postgresAppointmentsRepository) GetByUserId(ctx context.Context, id int
 		apts = append(apts, a)
 	}
 	if len(apts) == 0 {
-		return nil, ErrNoAppointments
+		return apts, nil
 	}
 	return apts, nil
 }
@@ -145,7 +145,7 @@ func (r *postgresAppointmentsRepository) GetByMasterId(ctx context.Context, id i
 		apts = append(apts, a)
 	}
 	if len(apts) == 0 {
-		return nil, ErrNoAppointments
+		return apts, nil
 	}
 	return apts, nil
 }
