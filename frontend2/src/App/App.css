@@ -1,0 +1,110 @@
+:root {
+     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+     --text-color: #222;
+     --bg-color: #f9f9f9;
+     --primary-color: #0057ff;
+     --secondary-color: #e0e0e0;
+     --border-radius: 6px;
+     --transition-fast: 0.2s ease;
+}
+
+*,
+*::before,
+*::after {
+     box-sizing: border-box;
+     margin: 0;
+     padding: 0;
+}
+
+html,
+body {
+     height: 100%;
+     font-family: var(--font-family);
+     color: var(--text-color);
+     background-color: var(--bg-color);
+     line-height: 1.6;
+     -webkit-font-smoothing: antialiased;
+}
+
+a {
+     color: var(--primary-color);
+     text-decoration: none;
+     transition: color var(--transition-fast);
+}
+
+a:hover {
+     text-decoration: underline;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+     font-weight: 600;
+     line-height: 1.25;
+     margin-bottom: 0.5em;
+}
+
+p {
+     margin-bottom: 1em;
+     max-width: 65ch;
+}
+
+ul,
+ol {
+     padding-left: 1.25em;
+     margin-bottom: 1em;
+}
+
+img {
+     max-width: 100%;
+     display: block;
+}
+
+button,
+input,
+select,
+textarea {
+     font: inherit;
+     border: 1px solid var(--secondary-color);
+     border-radius: var(--border-radius);
+     padding: 0.5em 0.75em;
+     transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+button {
+     background-color: var(--primary-color);
+     color: white;
+     cursor: pointer;
+     border: none;
+}
+
+button:hover {
+     background-color: #003fcc;
+}
+
+.container {
+     max-width: 960px;
+     margin: 0 auto;
+     padding: 2rem;
+}
+
+/* Простая сетка */
+.row {
+     display: flex;
+     flex-wrap: wrap;
+     margin: -0.5rem;
+}
+
+.col {
+     flex: 1 1 0;
+     padding: 0.5rem;
+}
+
+@media (max-width: 600px) {
+     .row {
+          flex-direction: column;
+     }
+}
