@@ -2,6 +2,7 @@ import { ThunkAction } from "redux-thunk";
 import { RootState } from "../../store/store";
 import { AuthActionTypes, loginFailure, request, loginSuccess, registerFailure, registerSuccess, logoutAction, userLoaded } from "./Auth.actions";
 import { setErrorAlert, setSuccessAlert } from "../Alert/Alert.thunks";
+import { isJwtExpired } from "../../utils/jwt";
 
 export type AppThunk<ReturnType = void> = ThunkAction<
      ReturnType,
@@ -17,6 +18,9 @@ export const loadUser = (): AppThunk => async (dispatch) => {
      const user = JSON.parse(userJSON) as IUser;
      if (!token) {
           dispatch(setErrorAlert("не могу загрузить пользователя!"))
+     }
+     if (isJwtExpired(token)) {
+          dispatch(logout());
      }
      if (!user.id) {
           dispatch(setErrorAlert("не могу загрузить пользователя!"))

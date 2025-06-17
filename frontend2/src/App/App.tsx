@@ -7,7 +7,6 @@ import Header from '../components/Header/Header';
 import { BrowserRouter } from 'react-router-dom';
 import { useAppDispatch } from '../hooks/hooks';
 import Confirm from '../components/Confirm/Confirm';
-
 function App() {
 	const dispatch = useAppDispatch();
 
@@ -17,12 +16,12 @@ function App() {
 
 	return (
 		<>
-		<BrowserRouter>
-			<Header />
-			<InitRoutes />
-			<Alert />
-			<Confirm/>
-		</BrowserRouter>
+			<BrowserRouter>
+				<Header />
+				<InitRoutes />
+				<Alert />
+				<Confirm />
+			</BrowserRouter>
 		</>
 	)
 }
