@@ -1,0 +1,30 @@
+.container {
+     max-width: 100%;
+     width: 100%;
+     margin: 0 auto;
+     padding: 20px;
+     display: flex;
+     gap: 20px;
+     align-items: flex-start;
+     flex-wrap: wrap;
+}
+
+.leftCol {
+     flex: 1 1 40%;
+     min-width: 250px;
+     position: relative;
+}
+
+.editButton {
+     position: absolute;
+     bottom: 5px;
+     left: 50%;
+     transform: translateX(-50%);
+     padding: 5px 10px;
+     font-size: 12px;
+     cursor: pointer;
+     background-color: rgba(255, 255, 255, 0.8);
+     border: 1px solid #ccc;
+     border-radius: 4px;
+     z-index: 1;
+}
