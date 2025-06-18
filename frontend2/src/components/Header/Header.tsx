@@ -13,7 +13,6 @@ const Header: React.FC = () => {
 
      const { user, loading } = useSelector((state: RootState) => state.auth);
      if (loading) return null; 
-     console.log(user);
 
      const handleLogout = () => {
           dispatch(logout());
