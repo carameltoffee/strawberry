@@ -3,9 +3,7 @@ import { Login } from "../components/Auth/Login";
 import { Register } from "../components/Auth/Register";
 import MastersList from "../components/Masters/MastersList";
 import Reservation from "../pages/Reservation/Reservation";
-import UserAppointmentsList from "../components/Appointments/UserAppointmentsList";
-import ScheduleEditor from "../components/Schedule/ScheduleEditor";
-import WorksEditor from "../components/Works/WorksEditor";
+import ProfilePage from "../pages/Profile/Profile";
 
 export const InitRoutes = () => {
      return (
@@ -14,9 +12,7 @@ export const InitRoutes = () => {
                <Route path="/register" element={<Register />} />
                <Route path="/" element={<MastersList/>}/>
                <Route path="/res/:id" element={<Reservation/>}/>
-               <Route path="/appointments" element={<UserAppointmentsList/>}/>
-               <Route path="/scheduleeditor" element={<ScheduleEditor/>}/>
-               <Route path="/workseditor" element={<WorksEditor/>}/>
+               <Route path="/me" element={<ProfilePage/>}/>
           </Routes>
      );
 };
