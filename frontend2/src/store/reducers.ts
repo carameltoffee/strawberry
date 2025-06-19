@@ -8,6 +8,7 @@ import { confirmReducer } from "../components/Confirm/Confirm.reducers";
 import { reviewsReducer } from "../components/Reviews/Reviews.reducers";
 import { appointmentsReducer } from "../components/Appointments/Appointments.reducers";
 import { avatarReducer } from "../components/Avatar/Avatar.reducers";
+import { userSearchReducer } from "../components/Search/Search.reducers";
 
 export const RootReducer = combineReducers({
      auth: authReducer,
@@ -19,4 +20,5 @@ export const RootReducer = combineReducers({
      reviews: reviewsReducer,
      appointments: appointmentsReducer,
      avatar: avatarReducer,
+     search: userSearchReducer,
 });
