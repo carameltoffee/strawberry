@@ -5,4 +5,5 @@ interface IUser {
      email: string;
      specialization?: string;
      registered_at: string;
+     average_rating?: number;
 }
