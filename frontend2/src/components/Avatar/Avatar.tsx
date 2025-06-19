@@ -5,12 +5,14 @@ import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks/hooks";
 import { uploadAvatar } from "./Avatar.thunks";
+import classNames from "classnames";
 
 type AvatarProps = {
      userId: string;
      size?: number;
      alt?: string;
      editable?: boolean;
+     clickable?: boolean;
 };
 
 const Avatar: React.FC<AvatarProps> = ({
@@ -18,6 +20,7 @@ const Avatar: React.FC<AvatarProps> = ({
      size = 120,
      alt = "User avatar",
      editable = false,
+     clickable = false,
 }) => {
      const fileInputRef = useRef<HTMLInputElement>(null);
      const token = useSelector((state: RootState) => state.auth.token);
@@ -41,7 +44,10 @@ const Avatar: React.FC<AvatarProps> = ({
 
      return (
           <div
-               className={`${styles.avatarWrapper} ${editable ? styles.editable : ""}`}
+               className={classNames(styles.avatarWrapper, {
+                    [styles.editable]: editable,
+                    [styles.clickable]: clickable,
+               })}
                style={{ width: size, height: size }}
                onClick={handleClick}
           >

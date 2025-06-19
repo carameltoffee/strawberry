@@ -4,6 +4,7 @@ import { AddReview } from "./Reviews.thunks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { setErrorAlert } from "../Alert/Alert.thunks";
+import styles from "./AddReviewForm.module.css";
 
 type AddReviewFormProps = {
      masterId: number;
@@ -14,29 +15,36 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({ masterId }) => {
 
      const [comment, setComment] = useState("");
      const [rating, setRating] = useState(5);
-     const token = useSelector((state: RootState) => state.auth.token)
-     const user = useSelector((state: RootState) => state.auth.user)
+     const token = useSelector((state: RootState) => state.auth.token);
+     const user = useSelector((state: RootState) => state.auth.user);
 
      const handleSubmit = (e: React.FormEvent) => {
+          e.preventDefault();
           if (!token || !user) {
                dispatch(setErrorAlert("Писать отзывы могут только авторизованные пользователи!"));
                return;
           }
-          e.preventDefault();
-          dispatch(AddReview(user.id.toString(), token, { master_id: masterId, rating, comment }));
+
+          dispatch(
+               AddReview(user.id.toString(), token, {
+                    master_id: masterId,
+                    rating,
+                    comment,
+               })
+          );
           setComment("");
           setRating(5);
      };
 
      return (
-          <form onSubmit={handleSubmit} className="space-y-4">
-               <h3 className="text-lg font-semibold">Оставить отзыв</h3>
-               <div>
-                    <label className="block mb-1">Оценка</label>
+          <form onSubmit={handleSubmit} className={styles.form}>
+               <div className={styles.rateGroup}>
+                    <label htmlFor="rating" className={styles.label}>Оценка</label>
                     <select
+                         id="rating"
                          value={rating}
                          onChange={(e) => setRating(Number(e.target.value))}
-                         className="border rounded px-2 py-1"
+                         className={styles.select}
                     >
                          {[5, 4, 3, 2, 1].map((r) => (
                               <option key={r} value={r}>
@@ -45,22 +53,20 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({ masterId }) => {
                          ))}
                     </select>
                </div>
-               <div>
-                    <label className="block mb-1">Комментарий</label>
+
+               <div className={styles.labelGroup} style={{ flex: "2 1 300px" }}>
+                    <label htmlFor="comment" className={styles.label}>Комментарий</label>
                     <textarea
+                         id="comment"
                          value={comment}
                          onChange={(e) => setComment(e.target.value)}
-                         rows={3}
-                         className="w-full border rounded px-2 py-1"
+                         rows={2}
+                         className={styles.textarea}
                          placeholder="Ваш отзыв..."
                     />
                </div>
-               <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-               >
-                    Отправить
-               </button>
+
+               <button type="submit" className={styles.button}>Отправить</button>
           </form>
      );
 };

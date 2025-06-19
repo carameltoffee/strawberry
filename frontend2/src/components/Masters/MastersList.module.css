@@ -1,0 +1,52 @@
+.wrapper {
+     padding: 2rem;
+}
+
+.input {
+     padding: 0.5rem 1rem;
+     border: 1px solid var(--secondary-color);
+     border-radius: var(--border-radius);
+     width: 100%;
+     margin-bottom: 1.5rem;
+     font-size: 1rem;
+     transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.input:focus {
+     outline: none;
+     border-color: var(--accent-color);
+     box-shadow: 0 0 0 2px rgba(253, 216, 53, 0.3);
+}
+
+.grid {
+     display: grid;
+     gap: 1.5rem;
+     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.card {
+     background-color: white;
+     border-radius: var(--border-radius);
+     padding: 1.25rem;
+     box-shadow: var(--shadow-small);
+     border: 1px solid var(--secondary-color);
+     transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+     cursor: pointer;
+}
+
+.card:hover {
+     box-shadow: var(--shadow-medium);
+     transform: scale(1.015);
+}
+
+.cardTitle {
+     font-size: 1.125rem;
+     font-weight: 600;
+     color: var(--primary-color);
+     margin-bottom: 0.5rem;
+}
+
+.cardText {
+     font-size: 0.9rem;
+     color: #555;
+}

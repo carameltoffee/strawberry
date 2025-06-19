@@ -6,6 +6,7 @@ import { RootState } from "../../store/store";
 import styles from './Header.module.css';
 import Avatar from "../Avatar/Avatar";
 import { useAppDispatch } from "../../hooks/hooks";
+import Logo from "../../assets/logo.png"
 
 const Header: React.FC = () => {
      const dispatch = useAppDispatch();
@@ -19,15 +20,22 @@ const Header: React.FC = () => {
           navigate("/login");
      };
 
+     const handleProfile = () => {
+          navigate("/me");
+     }
+
      return (
           <header className={styles.header}>
                <Link to="/" className={styles.logo}>
-                    МойСайт
+                    <img src={Logo}/>
+                    <strong>Бон Бон Записи</strong>
                </Link>
                <nav className={styles.nav}>
                     {user ? (
                          <>
-                              <Avatar userId={user.id.toString()} size={50}/>
+                              <div onClick={handleProfile}>
+                                   <Avatar userId={user.id.toString()} size={50} clickable={true}/>
+                              </div>
                               <button onClick={handleLogout} className={styles.logoutButton}>
                                    Выйти
                               </button>

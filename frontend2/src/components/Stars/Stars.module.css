@@ -1,0 +1,24 @@
+.wrapper {
+     display: inline-flex;
+     align-items: center;
+     gap: 8px;
+     font-size: 24px;
+}
+
+.stars {
+     display: inline-flex;
+     gap: 4px;
+}
+
+.filled {
+     color: #f5b301;
+}
+
+.empty {
+     color: #ccc;
+}
+
+.number {
+     font-size: 18px;
+     color: #333;
+}

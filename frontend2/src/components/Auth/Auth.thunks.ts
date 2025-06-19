@@ -16,14 +16,8 @@ export const loadUser = (): AppThunk => async (dispatch) => {
      const userTokenJSON = localStorage.getItem('token') || '{}';
      const token = JSON.parse(userTokenJSON);
      const user = JSON.parse(userJSON) as IUser;
-     if (!token) {
-          dispatch(setErrorAlert("не могу загрузить пользователя!"))
-     }
      if (isJwtExpired(token)) {
           dispatch(logout());
-     }
-     if (!user.id) {
-          dispatch(setErrorAlert("не могу загрузить пользователя!"))
      }
      dispatch(userLoaded(token, user))
 }

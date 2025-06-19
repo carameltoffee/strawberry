@@ -59,6 +59,7 @@ const UserAppointmentsList: React.FC = () => {
                                         <AppointmentCard
                                              key={appt.id}
                                              id={appt.id}
+                                             spec={master ? master.specialization : `эммм`}
                                              name={master ? master.full_name : `ID ${appt.master_id} (загрузка...)`}
                                              date={appt.scheduled_at}
                                              onDelete={handleDelete}
@@ -82,7 +83,6 @@ const UserAppointmentsList: React.FC = () => {
                                              id={appt.id}
                                              name={user ? user.full_name : `ID ${appt.user_id} (загрузка...)`}
                                              date={appt.scheduled_at}
-                                             status={appt.status}
                                              onDelete={handleDelete}
                                              variant="master"
                                         />

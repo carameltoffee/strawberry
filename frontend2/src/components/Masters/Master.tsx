@@ -6,6 +6,7 @@ import Avatar from "../Avatar/Avatar";
 import { useAppDispatch } from "../../hooks/hooks";
 import WorksSlider from "../Works/WorksSlider";
 import styles from "./Master.module.css";
+import Stars from "../Stars/Stars";
 
 type MasterProps = {
 	masterId: string;
@@ -32,16 +33,21 @@ const Master: React.FC<MasterProps> = ({ masterId }) => {
 	return (
 		<div className={styles.container}>
 			<div className={styles.leftCol}>
-				<Avatar userId={masterId} />
+				<div className={styles.avatar}>
+					<Avatar userId={masterId} />
+				</div>
 				<h1>{master.full_name}</h1>
-				<p><strong>Username:</strong> {master.username}</p>
+				<p><strong>Логин:</strong> {master.username}</p>
 				{master.specialization && (
 					<p><strong>Специализация:</strong> {master.specialization}</p>
 				)}
 				<p><strong>Зарегистрирован:</strong> {new Date(master.registered_at).toLocaleDateString()}</p>
+				{master.average_rating && (
+					<Stars rating={5}/>
+				)}
 			</div>
 
-			<div style={{ flex: "1 1 60%" }}>
+			<div className={styles.rightCol}>
 				<WorksSlider userId={masterId} />
 			</div>
 		</div>

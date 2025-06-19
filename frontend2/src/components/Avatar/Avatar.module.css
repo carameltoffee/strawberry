@@ -1,4 +1,5 @@
 .avatarWrapper {
+     border: 2px solid #008080;
      border-radius: 50%;
      overflow: hidden;
      position: relative;
@@ -14,6 +15,11 @@
 }
 
 .editable:hover .avatarImage {
+     cursor: pointer;
+     transform: scale(1.02);
+}
+
+.clickable:hover .avatarImage {
      cursor: pointer;
      transform: scale(1.02);
 }
