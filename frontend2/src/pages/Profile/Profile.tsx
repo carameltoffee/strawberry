@@ -7,18 +7,22 @@ import { useSelector } from "react-redux";
 import MasterEditable from "../../components/Masters/MasterEditable";
 
 
-const TABS = [
-     { id: "appointments", label: "Appointments" },
-     { id: "schedule", label: "Schedule Editor" },
-     { id: "works", label: "Works Editor" },
-];
 
 const ProfilePage: React.FC = () => {
      const [activeTab, setActiveTab] = useState("appointments");
      const user = useSelector((state: RootState) => state.auth.user);
-
+     const TABS = [
+          { id: "appointments", label: "Записи" },
+     ];     
      if(!user) { return }
-
+     
+     if(user.specialization != 'user'){
+          TABS.push(
+               { id: "schedule", label: "Расписание" },
+               { id: "works", label: "Работы" },
+          )
+     }
+     
      const renderTabContent = () => {
           switch (activeTab) {
                case "appointments":
