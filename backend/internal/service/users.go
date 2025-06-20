@@ -110,7 +110,7 @@ func (s *UsersService) GetByFullName(ctx context.Context, fn string) ([]models.U
 		l.Error("failed to get users by full name", zap.Error(err))
 		return nil, ErrInternal
 	}
-	return users, nil
+	return s.enrichWithRatings(ctx, users), nil
 }
 
 func (s *UsersService) GetById(ctx context.Context, id int64) (*models.User, error) {
@@ -125,9 +125,16 @@ func (s *UsersService) GetById(ctx context.Context, id int64) (*models.User, err
 		l.Error("can't get user", zap.Error(err))
 		return nil, ErrInternal
 	}
+
+	avgRating, err := s.r.Reviews.AverageRatingOfMaster(ctx, user.Id)
+	if err != nil {
+		l.Error("can't get average rating", zap.Error(err))
+		return nil, ErrInternal
+	}
+	user.AverageRating = avgRating
+
 	return user, nil
 }
-
 func (s *UsersService) GetByUsername(ctx context.Context, un string) (*models.User, error) {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
@@ -141,6 +148,14 @@ func (s *UsersService) GetByUsername(ctx context.Context, un string) (*models.Us
 		l.Error("failed to get user by username", zap.Error(err))
 		return nil, ErrInternal
 	}
+
+	avg, err := s.r.Reviews.AverageRatingOfMaster(ctx, user.Id)
+	if err != nil {
+		l.Error("failed to get rating", zap.Error(err))
+		return nil, ErrInternal
+	}
+	user.AverageRating = avg
+
 	return user, nil
 }
 
@@ -153,7 +168,7 @@ func (s *UsersService) GetMastersByRating(ctx context.Context) ([]models.User, e
 		l.Error("failed to get masters by rating", zap.Error(err))
 		return nil, ErrInternal
 	}
-	return users, nil
+	return s.enrichWithRatings(ctx, users), nil
 }
 
 func (s *UsersService) GetMastersBySpecialization(ctx context.Context, spec string) ([]models.User, error) {
@@ -165,21 +180,30 @@ func (s *UsersService) GetMastersBySpecialization(ctx context.Context, spec stri
 		l.Error("failed to get masters by specialization", zap.Error(err))
 		return nil, ErrInternal
 	}
-	return users, nil
+	return s.enrichWithRatings(ctx, users), nil
 }
 
 func (s *UsersService) Login(ctx context.Context, identifier, pswrd string) (string, error) {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
 
+	var user *models.User
+
 	user, err := s.r.Users.GetByUsername(ctx, identifier)
 	if err != nil {
 		if errors.Is(err, repository.ErrNoUsers) {
-			l.Warn("login failed - user not found", zap.String("identifier", identifier))
-			return "", ErrInvalidCredentials
+			user, err = s.r.Users.GetByEmail(ctx, identifier)
+			if err != nil {
+				if errors.Is(err, repository.ErrNoUsers) {
+					return "", ErrInvalidCredentials
+				}
+				l.Error("failed to fetch user by email for login", zap.Error(err))
+				return "", ErrInternal
+			}
+		} else {
+			l.Error("failed to fetch user by username for login", zap.Error(err))
+			return "", ErrInternal
 		}
-		l.Error("failed to fetch user for login", zap.Error(err))
-		return "", ErrInternal
 	}
 
 	expected := s.h.HashString(pswrd)
@@ -195,4 +219,25 @@ func (s *UsersService) Login(ctx context.Context, identifier, pswrd string) (str
 	}
 
 	return token, nil
+}
+func (s *UsersService) Search(ctx context.Context, query string) ([]models.User, error) {
+	ctx = logger.WithLogger(ctx)
+	l := logger.FromContext(ctx)
+
+	users, err := s.r.Users.SearchUsers(ctx, query)
+	if err != nil {
+		l.Error("can't search users for query", zap.Error(err))
+		return nil, ErrInternal
+	}
+	return s.enrichWithRatings(ctx, users), nil
+}
+
+func (s *UsersService) enrichWithRatings(ctx context.Context, users []models.User) []models.User {
+	for i := range users {
+		r, err := s.r.Reviews.AverageRatingOfMaster(ctx, users[i].Id)
+		if err == nil {
+			users[i].AverageRating = r
+		}
+	}
+	return users
 }

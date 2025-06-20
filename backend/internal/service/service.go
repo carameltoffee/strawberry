@@ -40,6 +40,8 @@ type Users interface {
 	GetMastersByRating(ctx context.Context) ([]models.User, error)
 	GetMastersBySpecialization(ctx context.Context, s string) ([]models.User, error)
 	Login(ctx context.Context, identifier string, pswrd string) (string, error)
+
+	Search(ctx context.Context, query string) ([]models.User, error)
 }
 
 type File interface {
