@@ -5,24 +5,23 @@ import UserAppointmentsList from "../../components/Appointments/UserAppointments
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
 import MasterEditable from "../../components/Masters/MasterEditable";
-
-
+import styles from "./Profile.module.css";
 
 const ProfilePage: React.FC = () => {
      const [activeTab, setActiveTab] = useState("appointments");
      const user = useSelector((state: RootState) => state.auth.user);
-     const TABS = [
-          { id: "appointments", label: "Записи" },
-     ];     
-     if(!user) { return }
-     
-     if(user.specialization != 'user'){
+
+     if (!user) return null;
+
+     const TABS = [{ id: "appointments", label: "Записи" }];
+
+     if (user.specialization !== "user") {
           TABS.push(
                { id: "schedule", label: "Расписание" },
-               { id: "works", label: "Работы" },
-          )
+               { id: "works", label: "Работы" }
+          );
      }
-     
+
      const renderTabContent = () => {
           switch (activeTab) {
                case "appointments":
@@ -37,27 +36,28 @@ const ProfilePage: React.FC = () => {
      };
 
      return (
-          <div className="max-w-4xl mx-auto p-6 space-y-6">
-               <MasterEditable masterId={user.id.toString()}/>
+          <div className={styles.container}>
+               <aside className={styles.sidebar}>
+                    <MasterEditable masterId={user.id.toString()} />
+               </aside>
 
-               <div>
-                    <div className="flex space-x-4 border-b pb-2">
+               <section className={styles.mainContent}>
+                    <div className={styles.tabs}>
                          {TABS.map((tab) => (
                               <button
                                    key={tab.id}
                                    onClick={() => setActiveTab(tab.id)}
-                                   className={`px-4 py-2 text-sm font-medium rounded-t-md transition-colors ${activeTab === tab.id
-                                             ? "bg-blue-500 text-white"
-                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                   className={`${styles.tabButton} ${activeTab === tab.id ? styles.tabButtonActive : ""
                                         }`}
+                                   type="button"
                               >
                                    {tab.label}
                               </button>
                          ))}
                     </div>
 
-                    <div className="mt-4">{renderTabContent()}</div>
-               </div>
+                    <div className={styles.tabContent}>{renderTabContent()}</div>
+               </section>
           </div>
      );
 };

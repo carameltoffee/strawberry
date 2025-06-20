@@ -1,0 +1,105 @@
+.container {
+     max-width: 1100px;
+     width: 100%;
+     margin: 0 auto;
+     margin-top:40px;
+     padding: 2rem;
+     background: white;
+     border-radius: var(--border-radius);
+     box-shadow: var(--shadow-medium);
+     display: flex;
+     gap: 1.5rem;
+     color: var(--text-color);
+     flex-wrap: wrap;
+}
+
+.sidebar {
+     flex: 0 0 280px;
+     border-right: 1px solid var(--secondary-color);
+     padding-right: 1.5rem;
+}
+
+.mainContent {
+     flex: 1 1 0;
+     min-width: 0;
+     width: 100%;
+     display: flex;
+     flex-direction: column;
+     gap: 1rem;
+}
+
+.tabs {
+     display: flex;
+     border-bottom: 1px solid var(--secondary-color);
+     margin-bottom: 1rem;
+}
+
+.container p {
+     margin: 0;
+}
+
+.tabButton {
+     border: none;
+     background: white;
+     color: var(--primary-color);
+     padding: 0.75rem 1.5rem;
+     font-weight: 600;
+     cursor: pointer;
+     border-bottom: 3px solid transparent;
+     transition: all var(--transition-fast);
+     border-radius: 0 0 var(--border-radius) var(--border-radius);
+     margin-right: 0.5rem;
+     user-select: none;
+}
+
+.tabButton:hover {
+     background-color: var(--secondary-color);
+}
+
+.tabButtonActive {
+     border-bottom-color: var(--primary-color);
+     font-weight: 700;
+     color: var(--primary-color);
+}
+
+.tabContent {
+     background: var(--secondary-color);
+     border-radius: var(--border-radius);
+     padding: 1.5rem;
+     box-shadow: var(--shadow-small);
+     min-height: 200px;
+
+     width: 100%;
+     min-width: 0;
+     overflow-x: auto;
+     display: flex;
+     flex-direction: column;
+     gap: 1rem;
+}
+
+.tabContent>* {
+     flex-grow: 1;
+     flex-shrink: 1;
+     flex-basis: 0;
+     min-width: 300px;
+     max-width: 100%;
+}
+
+@media (max-width: 600px) {
+     .container {
+          flex-direction: column;
+     }
+
+     .sidebar {
+          border-right: none;
+          padding-right: 0;
+          border-bottom: 1px solid var(--secondary-color);
+          padding-bottom: 1rem;
+          margin-bottom: 1rem;
+          width: 100%;
+     }
+
+     .mainContent {
+          min-width: 100%;
+     }
+}
