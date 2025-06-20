@@ -4,6 +4,7 @@ import { RootState } from "../../store/store";
 import { useAppDispatch } from "../../hooks/hooks";
 import { GetReviews } from "./Reviews.thunks";
 import Avatar from "../Avatar/Avatar";
+import styles from "./ReviewsList.module.css";
 
 type ReviewsListProps = {
      masterId: string;
@@ -19,19 +20,22 @@ const ReviewsList: React.FC<ReviewsListProps> = ({ masterId }) => {
      }, [dispatch, masterId]);
 
      if (loading) return <p>Загрузка отзывов...</p>;
-     if (error) return;
+     if (error) return null;
+
      return (
-          <div>
-               <h2 className="text-xl font-semibold mb-2">Отзывы</h2>
+          <div className={styles.container}>
+               <h2 className={styles.title}>Отзывы</h2>
                {!reviewsByMaster[masterId] ? (
-                    <p>Отзывов пока нет.</p>
+                    <p className={styles.noReviews}>Отзывов пока нет.</p>
                ) : (
-                    <ul className="space-y-3">
+                    <ul className={styles.list}>
                          {reviewsByMaster[masterId].map((review) => (
-                              <li key={review.id} className="p-3 border rounded shadow-sm">
-                                   <Avatar userId={review.user_id.toString()} size={30}/>
-                                   <div className="font-medium">Оценка: {review.rating}/5</div>
-                                   <p className="text-gray-700">{review.comment}</p>
+                              <li key={review.id} className={styles.listItem}>
+                                   <Avatar userId={review.user_id.toString()} size={30} />
+                                   <div className={styles.reviewContent}>
+                                        <div className={styles.rating}>Оценка: {review.rating}/5</div>
+                                        <p className={styles.comment}>{review.comment}</p>
+                                   </div>
                               </li>
                          ))}
                     </ul>

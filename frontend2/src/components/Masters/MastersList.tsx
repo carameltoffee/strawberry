@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { searchUsers } from "../Search/Search.thunks";
 import debounce from "lodash.debounce";
 import styles from "./MastersList.module.css";
+import Stars from "../Stars/Stars";
 
 const MastersList: React.FC = () => {
      const dispatch = useAppDispatch();
@@ -69,6 +70,9 @@ const MastersList: React.FC = () => {
                          >
                               <h2 className={styles.cardTitle}>{master.full_name}</h2>
                               <p className={styles.cardText}>{master.specialization}</p>
+                              {master.average_rating && (
+                                   <Stars rating={master.average_rating} />
+                              )}
                          </div>
                     ))}
                </div>

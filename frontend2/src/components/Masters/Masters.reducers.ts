@@ -27,7 +27,6 @@ export function mastersReducer(state = initialState, action: MastersActionTypes)
                     acc[master.id.toString()] = master;
                     return acc;
                }, {} as Record<string, IUser>);
-               console.log(mastersById);
 
                return {
                     ...state,

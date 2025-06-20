@@ -18,6 +18,8 @@ const Master: React.FC<MasterProps> = ({ masterId }) => {
 	const master = useSelector(
 		(state: RootState) => state.masters.mastersById[masterId]
 	);
+
+	console.log(master);
 	const isLoading = useSelector((state: RootState) => state.masters.loading);
 	const error = useSelector((state: RootState) => state.masters.error);
 
@@ -43,7 +45,7 @@ const Master: React.FC<MasterProps> = ({ masterId }) => {
 				)}
 				<p><strong>Зарегистрирован:</strong> {new Date(master.registered_at).toLocaleDateString()}</p>
 				{master.average_rating && (
-					<Stars rating={5}/>
+					<Stars rating={master.average_rating}/>
 				)}
 			</div>
 

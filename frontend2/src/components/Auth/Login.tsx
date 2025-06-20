@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { loginUser } from './Auth.thunks';
 import styles from './Login.module.css';
 import { useAppDispatch } from '../../hooks/hooks';
+import { useNavigate } from 'react-router-dom';
 
 
 export const Login: React.FC = () => {
+     const navigate = useNavigate();
      const dispatch = useAppDispatch();
      const loading = useSelector((state: RootState) => state.auth.loading)
+     const user = useSelector((state: RootState) => state.auth.user);
 
      const [identifier, setEmail] = useState('');
      const [password, setPassword] = useState('');
@@ -17,6 +20,12 @@ export const Login: React.FC = () => {
           e.preventDefault();
           dispatch(loginUser({ username: identifier, password }));
      };
+
+     useEffect(() => {
+          if (user) {
+               navigate("/");
+          }
+     }, [user, navigate]);
 
      return (
           <form className={styles.form} onSubmit={submitHandler}>
