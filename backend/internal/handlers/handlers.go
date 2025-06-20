@@ -31,6 +31,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	api := r.Group("api")
 	{
 
+		api.GET("/search", h.Search)
+
 		api.POST("/send-code", h.SendVerificationCode)
 
 		api.POST("/register", h.Register)
@@ -60,7 +62,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			auth.POST("users/works", h.UploadMasterWork)
 			auth.POST("/users/avatar", h.UploadAvatar)
 			auth.DELETE("masters/works/:id", h.DeleteMasterWork)
-			// auth.DELETE("/users/avatar", h.DeleteAvatar)
 			auth.GET("/appointments", h.GetAppointments)
 			auth.POST("/appointments", h.CreateAppointment)
 			auth.DELETE("/appointments/:id", h.DeleteAppointment)

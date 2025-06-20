@@ -337,3 +337,23 @@ func (h *Handler) GetMasterAppointments(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, appointments)
 }
+
+// Search godoc
+// @Summary      Search Masters
+// @Description  Search Master by full_name, username or specialization
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        key query string true "Search query (searching for full_name, username, specialization)"
+// @Success      200 {array} models.User
+// @Failure      500 {object} ErrorResponse
+// @Router       /search [get]
+func (h *Handler) Search(c *gin.Context) {
+	query := c.Query("key")
+	masters, err := h.s.Users.Search(c.Request.Context(), query)
+	if err != nil {
+		newErrorResponse(http.StatusInternalServerError, "cannot get appointments", c)
+		return
+	}
+	c.JSON(http.StatusOK, masters)
+}
