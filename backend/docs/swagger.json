@@ -972,6 +972,47 @@
                 }
             }
         },
+        "/search": {
+            "get": {
+                "description": "Search Master by full_name, username or specialization",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Search Masters",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query (searching for full_name, username, specialization)",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.User"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/send-code": {
             "post": {
                 "description": "Sends a verification code to the provided email address",
