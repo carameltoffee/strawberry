@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strawberry/internal/models"
@@ -121,4 +122,20 @@ func (r *reviewsRepo) Delete(ctx context.Context, id int64) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func (r *reviewsRepo) AverageRatingOfMaster(ctx context.Context, masterId int64) (float64, error) {
+	var avg sql.NullFloat64
+
+	err := r.db.QueryRow(ctx, `
+        SELECT AVG(rating) FROM reviews WHERE master_id = $1
+    `, masterId).Scan(&avg)
+	if err != nil {
+		return 0, err
+	}
+
+	if avg.Valid {
+		return avg.Float64, nil
+	}
+	return 0, nil
 }

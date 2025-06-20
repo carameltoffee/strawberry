@@ -29,6 +29,7 @@ type Reviews interface {
 	GetByMasterId(ctx context.Context, masterId int64) ([]models.Review, error)
 	Update(ctx context.Context, r *models.Review) error
 	Delete(ctx context.Context, id int64) error
+	AverageRatingOfMaster(ctx context.Context, id int64) (float64, error)
 }
 
 type Schedules interface {
@@ -47,8 +48,10 @@ type Users interface {
 	GetById(ctx context.Context, id int64) (*models.User, error)
 	GetByFullName(ctx context.Context, fn string) ([]models.User, error)
 	GetByUsername(ctx context.Context, un string) (*models.User, error)
+	GetByEmail(ctx context.Context, em string) (*models.User, error)
 	GetMastersByRating(ctx context.Context) ([]models.User, error)
 	GetMastersBySpecialization(ctx context.Context, s string) ([]models.User, error)
+	SearchUsers(ctx context.Context, query string) ([]models.User, error)
 }
 
 type Appointments interface {
