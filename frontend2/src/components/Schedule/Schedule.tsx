@@ -6,10 +6,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { GetSchedule } from "./Schedule.thunks";
 import { useAppDispatch } from "../../hooks/hooks";
-import { setConfirmCallbacks, showConfirm } from "../Confirm/Confirm.actions";
 import { setErrorAlert, setSuccessAlert } from "../Alert/Alert.thunks";
 import { CreateAppointment } from "../Appointments/Appointments.thunks";
 import { combineDateTime, getLocalDateString } from "../../utils/dates";
+import { useConfirm } from "../../hooks/Confirm/Confirm";
 
 export type ScheduleProps = {
      userId: string;
@@ -22,6 +22,7 @@ const Schedule = ({ userId }: ScheduleProps) => {
      const loading = useSelector((state: RootState) => state.schedule.loading);
      const error = useSelector((state: RootState) => state.schedule.error);
      const token = useSelector((state: RootState) => state.auth.token);
+     const confirm = useConfirm();
 
      useEffect(() => {
           if (selectedDate) {
@@ -31,15 +32,16 @@ const Schedule = ({ userId }: ScheduleProps) => {
      }, [selectedDate, dispatch, userId]);
 
      const handleSlotClick = (slot: string) => {
-          dispatch(showConfirm(`Вы хотите записаться ${getLocalDateString(selectedDate)} на ${slot}?`));
-          dispatch(setConfirmCallbacks(
-               () => {
+          confirm({
+               message: `Вы хотите записаться ${getLocalDateString(selectedDate)} на ${slot}?`,
+               onConfirm: () => {
                     if (!token) {
                          dispatch(setErrorAlert("Нужно быть авторизованным для записи"));
                          return;
                     }
 
                     const scheduled_at = combineDateTime(selectedDate, slot);
+
                     dispatch(CreateAppointment(token, {
                          master_id: parseInt(userId),
                          time: scheduled_at,
@@ -47,8 +49,7 @@ const Schedule = ({ userId }: ScheduleProps) => {
 
                     dispatch(setSuccessAlert("Успешно записались!"));
                },
-               () => { }
-          ));
+          });
      };
 
      return (
@@ -86,7 +87,7 @@ const Schedule = ({ userId }: ScheduleProps) => {
                     </div>
                )}
 
-               {!loading && selectedDate && (!schedule?.slots || schedule?.slots.length === 0)  && (
+               {!loading && selectedDate && (!schedule?.slots || schedule?.slots.length === 0) && (
                     <p className="mt-4 text-gray-500 text-center">Нет доступных слотов на выбранную дату.</p>
                )}
           </div>

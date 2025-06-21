@@ -27,6 +27,16 @@ export const GetSchedule = (date: string, user_id: string): AppThunk => async (d
 
           const data = await response.json();
 
+          if (!data.slots) {
+               data.slots = [];
+          }
+          if (!data.appointments) {
+               data.appointments = [];
+          }
+          if (!data.days_off) {
+               data.days_off = [];
+          }
+
           if (data.days_off?.includes(date)) {
                data.slots = [];
           }

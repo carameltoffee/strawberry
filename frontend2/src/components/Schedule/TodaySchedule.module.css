@@ -1,0 +1,27 @@
+.container {
+     padding: 40px;
+}
+
+.header {
+     font-size: 20px;
+     margin-bottom: 16px;
+}
+
+.cards {
+     display: grid;
+     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+     gap: 16px;
+}
+
+.card {
+     background-color: #f9f9f9;
+     border-radius: 12px;
+     padding: 16px;
+     text-align: center;
+     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time {
+     font-size: 18px;
+     font-weight: bold;
+}

@@ -65,6 +65,7 @@ const ScheduleByDate: React.FC = () => {
           if (isDayOff) {
                dispatch(setDayOff(token, isoDate));
           } else {
+               dispatch(deleteDayOff(token, isoDate));
                if (dateSlots.length === 0) {
                     dispatch(deleteWorkingHoursByDate(token, isoDate));
                } else {
