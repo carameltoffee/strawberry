@@ -26,7 +26,8 @@ export const reviewsReducer = (
 ): ReviewsState => {
      switch (action.type) {
           case REVIEWS_LOAD_REQUEST:
-               return { ...state, loading: true, error: null };
+               
+               return { ...state, loading: true, error: null, };
 
           case REVIEWS_LOAD_SUCCESS:
                return {

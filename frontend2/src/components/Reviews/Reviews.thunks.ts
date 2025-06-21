@@ -44,6 +44,7 @@ export const AddReview = (userId: string, token: string, review: IReviewInput): 
           });
 
           const data = await res.json();
+          if (res.status == 403) throw new Error("Вы не можете написать отзыв не побывав у мастера");
           if (!res.ok) throw new Error(data?.error || "Ошибка при добавлении отзыва");
 
           if (!data.user_id) {
