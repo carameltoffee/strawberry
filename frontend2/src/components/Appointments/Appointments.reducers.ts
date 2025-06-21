@@ -32,6 +32,7 @@ export const appointmentsReducer = (
                return { ...state, loading: true, error: null };
           case APPOINTMENTS_LOAD_SUCCESS:
                const { user_appointments, master_appointments } = action.payload.appointments;
+               console.log(user_appointments);
 
                return {
                     ...state,

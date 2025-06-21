@@ -1,5 +1,6 @@
 import React from "react";
 import { formatTimestampUTC } from "../../utils/dates";
+import styles from "./AppointmentCard.module.css";
 
 interface AppointmentCardProps {
      id: number;
@@ -20,17 +21,23 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
      onDelete,
      variant = "user",
 }) => {
-     const bgClass = variant === "user" ? "bg-white" : "bg-blue-50";
+     const bgClass = variant === "user" ? styles.bgUser : styles.bgMaster;
 
      return (
-          <li className={`p-4 border rounded shadow-sm ${bgClass} relative group`}>
-               <div><strong>{variant === "user" ? "Мастер" : "Клиент"}:</strong> {name} {spec && `(${spec})`}</div>
-               <div><strong>Дата:</strong> {formatTimestampUTC(date)}</div>
-               {status && <div><strong>Статус:</strong> {status}</div>}
-               <button
-                    onClick={() => onDelete(id)}
-                    className="absolute top-2 right-2 text-sm text-red-600 hover:underline"
-               >
+          <li className={`${styles.card} ${bgClass}`}>
+               <div>
+                    <strong>{variant === "user" ? "Мастер" : "Клиент"}:</strong> {name}
+                    {spec && ` (${spec})`}
+               </div>
+               <div>
+                    <strong>Дата:</strong> {formatTimestampUTC(date)}
+               </div>
+               {status && (
+                    <div>
+                         <strong>Статус:</strong> {status}
+                    </div>
+               )}
+               <button className={styles.deleteBtn} onClick={() => onDelete(id)}>
                     Отменить
                </button>
           </li>

@@ -3,15 +3,18 @@ import { useAppDispatch } from "../../hooks/hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { GetAppointments, DeleteAppointment } from "./Appointments.thunks";
-import { setConfirmCallbacks, showConfirm } from "../Confirm/Confirm.actions";
 import { GetMasterById } from "../Masters/Masters.thunks";
 import AppointmentCard from "./AppointmentCard";
+import { useConfirm } from "../../hooks/Confirm/Confirm";
+import { Spinner } from "../Spinner/Spinner";
 
 const UserAppointmentsList: React.FC = () => {
      const dispatch = useAppDispatch();
      const { items, loading, error } = useSelector((state: RootState) => state.appointments);
      const mastersById = useSelector((state: RootState) => state.masters.mastersById);
      const token = useSelector((state: RootState) => state.auth.token);
+     const confirm = useConfirm();
+
 
      useEffect(() => {
           if (!token) return;
@@ -35,15 +38,18 @@ const UserAppointmentsList: React.FC = () => {
      const handleDelete = (id: number) => {
           if (!token) return;
 
-          dispatch(setConfirmCallbacks(
-               () => dispatch(DeleteAppointment(token, id)),
-               () => { }
-          ));
-          dispatch(showConfirm("Вы уверены, что хотите удалить эту запись?"));
+          confirm({
+               message: "Вы уверены, что хотите удалить эту запись?",
+               onConfirm: () => dispatch(DeleteAppointment(token, id)),
+          });
      };
 
-     if (loading) return <p>Загрузка записей...</p>;
+     if (loading) return <Spinner/>;
+
      if (error) return <p className="text-red-500">{error}</p>;
+
+     if (!items) return null;
+
      if (!items.user_appointments.length && !items.master_appointments.length)
           return <p>У вас нет записей.</p>;
 
@@ -54,8 +60,10 @@ const UserAppointmentsList: React.FC = () => {
                          <h2 className="text-xl font-semibold mb-2">Записи, которые вы сделали</h2>
                          <ul className="space-y-3">
                               {items.user_appointments.map((appt) => {
+                                   console.log(appt);
                                    const master = mastersById[appt.master_id];
                                    return (
+
                                         <AppointmentCard
                                              key={appt.id}
                                              id={appt.id}

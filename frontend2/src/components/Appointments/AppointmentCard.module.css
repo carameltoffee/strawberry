@@ -1,0 +1,42 @@
+.card {
+     position: relative;
+     padding: 1rem;
+     border: 1px solid var(--secondary-color);
+     border-radius: var(--border-radius);
+     box-shadow: var(--shadow-small);
+     list-style: none;
+     background-color: white !important;
+     transition: box-shadow var(--transition-fast);
+     font-family: var(--font-family);
+     color: var(--text-color);
+}
+
+.card:hover {
+     box-shadow: var(--shadow-medium);
+}
+
+.bgUser {
+     background-color: white;
+}
+
+.bgMaster {
+     background-color: var(--secondary-color);
+}
+
+.deleteBtn {
+     position: absolute;
+     top: 0.75rem;
+     right: 0.75rem;
+     background: none;
+     border: none;
+     color: var(--primary-color);
+     font-size: 0.9rem;
+     font-weight: 600;
+     cursor: pointer;
+     transition: color var(--transition-fast);
+}
+
+.deleteBtn:hover {
+     color: var(--accent-color);
+     text-decoration: underline;
+}
