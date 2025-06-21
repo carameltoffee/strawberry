@@ -6,7 +6,7 @@ import { loadUser } from '../components/Auth/Auth.thunks';
 import Header from '../components/Header/Header';
 import { BrowserRouter } from 'react-router-dom';
 import { useAppDispatch } from '../hooks/hooks';
-import Confirm from '../components/Confirm/Confirm';
+import { ConfirmProvider } from '../hooks/Confirm/Confirm';
 function App() {
 	const dispatch = useAppDispatch();
 
@@ -17,10 +17,11 @@ function App() {
 	return (
 		<>
 			<BrowserRouter>
+			<ConfirmProvider>
 				<Header />
 				<InitRoutes />
 				<Alert />
-				<Confirm />
+			</ConfirmProvider>
 			</BrowserRouter>
 		</>
 	)
