@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strawberry/internal/models"
 	"strawberry/internal/service"
@@ -10,9 +11,9 @@ import (
 )
 
 type CreateReviewReq struct {
-	MasterId int64 `json:"master_id"`
-	Comment string `json:"comment"`
-	Rating int `json:"rating"`
+	MasterId int64  `json:"master_id"`
+	Comment  string `json:"comment"`
+	Rating   int    `json:"rating"`
 }
 
 // CreateReview создает новый отзыв
@@ -41,13 +42,17 @@ func (h *Handler) CreateReview(c *gin.Context) {
 	}
 
 	review := &models.Review{
-		UserId: claims.Id,
+		UserId:   claims.Id,
 		MasterId: input.MasterId,
-		Rating: input.Rating,
-		Comment: input.Comment,
+		Rating:   input.Rating,
+		Comment:  input.Comment,
 	}
 
 	if err := h.s.Reviews.Create(c.Request.Context(), review); err != nil {
+		if errors.Is(err, service.ErrNoPastAppointments) {
+			newErrorResponse(http.StatusForbidden, "you can't make a review without visiting the master", c)
+			return
+		}
 		newErrorResponse(http.StatusInternalServerError, "cannot create review", c)
 		return
 	}
