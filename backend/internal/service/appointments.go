@@ -203,7 +203,7 @@ func (s *AppointmentsService) Delete(ctx context.Context, id int64, userId int64
 	}
 
 	msg := fmt.Sprintf("Похоже что %s отменил(а) вашу запись в %s...Попробуете записаться в другое время?", master.FullName, a.ScheduledAt.Format("2006-01-02 15:04"))
-	
+
 	go func() {
 		bgCtx := context.Background()
 		bgCtx = logger.WithLogger(bgCtx)

@@ -21,9 +21,10 @@ type ReviewsService struct {
 }
 
 var (
-	ErrNotFound         = errors.New("resource not found")
-	ErrConflict         = errors.New("resource already exists")
-	ErrInvalidReference = errors.New("invalid foreign key reference")
+	ErrNotFound           = errors.New("resource not found")
+	ErrConflict           = errors.New("resource already exists")
+	ErrInvalidReference   = errors.New("invalid foreign key reference")
+	ErrNoPastAppointments = errors.New("no past appointments with this master")
 )
 
 func newReviewsService(r *repository.Repository, rmq *rabbitmq.MQConnection) *ReviewsService {
@@ -80,7 +81,27 @@ func (s *ReviewsService) Create(ctx context.Context, r *models.Review) error {
 
 	l.Info("start creating review", zap.Int64("user_id", r.UserId), zap.Int64("master_id", r.MasterId))
 
-	err := s.repo.Reviews.Create(ctx, r)
+	appointments, err := s.repo.Appointments.GetByUserId(ctx, r.UserId)
+	if err != nil {
+		l.Error("cannot get appointment", zap.Error(err))
+		return err
+	}
+
+	hasPastAppointment := false
+	now := time.Now()
+	for _, appointment := range appointments {
+		if appointment.ScheduledAt.Before(now) {
+			hasPastAppointment = true
+			break
+		}
+	}
+
+	if !hasPastAppointment {
+		l.Warn("user has no past appointments, cannot leave review", zap.Int64("user_id", r.UserId))
+		return ErrNoPastAppointments
+	}
+
+	err = s.repo.Reviews.Create(ctx, r)
 	if err != nil {
 		l.Error("cannot create review", zap.Error(err))
 		if errors.Is(err, repository.ErrConflict) {
