@@ -27,6 +27,9 @@
 .master {
      flex: 2 1 600px;
      min-width: 400px;
+     max-width: 100%;
+     overflow-x: hidden;
+     box-sizing: border-box;
      background-color: white;
      padding: 1.5rem;
      border-radius: var(--border-radius);
@@ -42,4 +45,17 @@
      padding: 1.5rem;
      border-radius: var(--border-radius);
      box-shadow: var(--shadow-small);
+}
+
+@media (max-width: 600px) {
+     .content {
+          flex-direction: column;
+     }
+
+     .schedule,
+     .master,
+     .reviews {
+          min-width: auto;
+          flex: 1 1 auto;
+     }
 }
