@@ -29,7 +29,18 @@
     line-height: 1.1;
 }
 
+
 .rightCol {
-    flex: 1;
-    min-width: 340px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    overflow-x:hidden;
+    max-width: 100%;
+}
+
+@media (max-width: 600px) {
+     .rightCol  {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
 }
