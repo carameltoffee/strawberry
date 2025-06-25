@@ -25,18 +25,20 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
      return (
           <li className={`${styles.card} ${bgClass}`}>
-               <div>
-                    <strong>{variant === "user" ? "Мастер" : "Клиент"}:</strong> {name}
-                    {spec && ` (${spec})`}
-               </div>
-               <div>
-                    <strong>Дата:</strong> {formatTimestampUTC(date)}
-               </div>
-               {status && (
+               <div className={styles.data}>
                     <div>
-                         <strong>Статус:</strong> {status}
+                         <strong>{variant === "user" ? "Мастер" : "Клиент"}:</strong> {name}
+                         {spec && ` (${spec})`}
                     </div>
-               )}
+                    <div>
+                         <strong>Дата:</strong> {formatTimestampUTC(date)}
+                    </div>
+                    {status && (
+                         <div>
+                              <strong>Статус:</strong> {status}
+                         </div>
+                    )}
+               </div>
                <button className={styles.deleteBtn} onClick={() => onDelete(id)}>
                     Отменить
                </button>

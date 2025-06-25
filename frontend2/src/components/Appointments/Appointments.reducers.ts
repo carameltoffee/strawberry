@@ -49,10 +49,10 @@ export const appointmentsReducer = (
                     ...state,
                     items: {
                          ...state.items,
-                         user_appointments: [
-                              ...(state.items.user_appointments || []),
-                              action.payload.appointment,
-                         ],
+                         // user_appointments: [
+                         //      ...(state.items.user_appointments || []),
+                         //      action.payload.appointment,
+                         // ],
                     },
                };
           case APPOINTMENT_DELETE_SUCCESS:

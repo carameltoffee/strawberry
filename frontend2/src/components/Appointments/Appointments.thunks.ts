@@ -44,16 +44,9 @@ export const CreateAppointment = (token: string, appointment: IAppointmentInput)
                },
                body: JSON.stringify(appointment),
           });
-          const { id } = await res.json();
-          if (!res.ok || !id) throw new Error("Ошибка при записи");
+          if (!res.ok ) throw new Error("Ошибка при записи");
 
-          const detailsRes = await fetch(`${__BASE_API_URL__}/appointments/${id}`, {
-               headers: { Authorization: `Bearer ${token}` },
-          });
-          const fullAppointment = await detailsRes.json();
-          if (!detailsRes.ok) throw new Error("Не удалось получить запись");
-
-          dispatch(appointmentCreateSuccess(fullAppointment));
+          dispatch(appointmentCreateSuccess());
      } catch (err) {
           const msg = err instanceof Error ? err.message : "Неизвестная ошибка";
           dispatch(setErrorAlert(msg));

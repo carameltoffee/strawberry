@@ -11,6 +11,10 @@
      color: var(--text-color);
 }
 
+.data {
+     max-width: 70%;
+}
+
 .card:hover {
      box-shadow: var(--shadow-medium);
 }

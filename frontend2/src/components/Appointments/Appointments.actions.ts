@@ -21,7 +21,6 @@ export interface AppointmentsLoadFailure {
 
 export interface AppointmentCreateSuccess {
      type: typeof APPOINTMENT_CREATE_SUCCESS;
-     payload: { appointment: IAppointment };
 }
 
 export interface AppointmentDeleteSuccess {
@@ -53,11 +52,8 @@ export const appointmentsLoadFailure = (error: string): AppointmentsLoadFailure 
      payload: { error },
 });
 
-export const appointmentCreateSuccess = (
-     appointment: IAppointment
-): AppointmentCreateSuccess => ({
+export const appointmentCreateSuccess = (): AppointmentCreateSuccess => ({
      type: APPOINTMENT_CREATE_SUCCESS,
-     payload: { appointment },
 });
 
 export const appointmentDeleteSuccess = (
