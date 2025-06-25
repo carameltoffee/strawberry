@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	App struct {
-		Port int `envconfig:"REST_PORT" default:"8080"`
+		Port int `envconfig:"PORT" default:"8080"`
 	}
 	Database struct {
 		User     string `envconfig:"DB_USER" required:"true"`
