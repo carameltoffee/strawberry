@@ -8,7 +8,6 @@ import (
 	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
 	"github.com/pressly/goose/v3"
 )
 
@@ -22,10 +21,6 @@ var (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: error loading .env file:", err)
-	}
-
 	dbString := os.Getenv("DATABASE_URL")
 	if dbString == "" {
 		dbString = buildDatabaseURLFromEnv()
