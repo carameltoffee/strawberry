@@ -4,6 +4,7 @@ import styles from "./WorksSlider.module.css";
 import { RootState } from "../../store/store";
 import { getWorks } from "./Works.thunks";
 import { useAppDispatch } from "../../hooks/hooks";
+import WorkPreview from "./WorkPreview";
 
 type WorksSliderProps = {
      userId: string;
@@ -18,6 +19,7 @@ const WorksSlider: React.FC<WorksSliderProps> = ({ userId, interval = 5000 }) =>
      const error = useSelector((state: RootState) => state.works.error);
 
      const [currentIndex, setCurrentIndex] = useState(0);
+     const [previewImage, setPreviewImage] = useState<string | null>(null);
      const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
      useEffect(() => {
@@ -53,6 +55,14 @@ const WorksSlider: React.FC<WorksSliderProps> = ({ userId, interval = 5000 }) =>
           setCurrentIndex((prev) => (prev === worksIds.length - 1 ? 0 : prev + 1));
      };
 
+     const openPreview = (workId: string) => {
+          setPreviewImage(`${__BASE_API_URL__}/users/${userId}/works/${workId}`);
+     };
+
+     const closePreview = () => {
+          setPreviewImage(null);
+     };
+
      if (loading) return <div>Загрузка...</div>;
      if (error) return <div>Ошибка: {error}</div>;
      if (!worksIds || worksIds.length === 0) return null;
@@ -64,13 +74,14 @@ const WorksSlider: React.FC<WorksSliderProps> = ({ userId, interval = 5000 }) =>
                          ‹
                     </button>
                     <div className={styles.workItem}>
-                         {worksIds.map((work: React.Key | null | undefined, index: number) => (
+                         {worksIds.map((work, index) => (
                               <img
                                    key={work}
                                    src={`${__BASE_API_URL__}/users/${userId}/works/${work}`}
                                    alt={`Пример работы ${index + 1}`}
                                    className={`${styles.workImage} ${index === currentIndex ? styles.active : styles.inactive}`}
                                    loading="lazy"
+                                   onClick={() => openPreview(work.toString())}
                               />
                          ))}
                     </div>
@@ -78,6 +89,7 @@ const WorksSlider: React.FC<WorksSliderProps> = ({ userId, interval = 5000 }) =>
                          ›
                     </button>
                </div>
+               {previewImage && <WorkPreview imageUrl={previewImage} onClose={closePreview} />}
           </div>
      );
 };

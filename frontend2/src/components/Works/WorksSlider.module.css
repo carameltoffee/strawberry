@@ -1,5 +1,5 @@
 .worksSection {
-     max-width: 600px;
+     max-width: 400px;
      margin: 0 auto;
      text-align: center;
 }
@@ -56,4 +56,10 @@
 
 .navButton:hover {
      color: #000;
+}
+
+@media (max-width: 600px) {
+     .worksSection {
+          max-width: 100%
+     }
 }
