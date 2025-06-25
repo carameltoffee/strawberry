@@ -60,7 +60,7 @@ func main() {
 	minio, err := minio_client.New(fmt.Sprintf("minio:%d", cfg.Minio.Port), cfg.Minio.AccessKey,
 		cfg.Minio.SecretKey, cfg.Minio.SslMode)
 	if err != nil {
-		panic(err)
+		log.Error("minio doesn't work")
 	}
 	rmq, err := rabbitmq.ConnectRabbitMQ(cfg.RabbitMq.Uri)
 	if err != nil {
