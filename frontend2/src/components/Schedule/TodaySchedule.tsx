@@ -22,13 +22,17 @@ const TodaySchedule: React.FC<TodayScheduleProps> = ({ userId }) => {
 
      if (loading) return <Spinner />;
      if (error) return <div>Ошибка: {error}</div>;
-     if (!schedule) return <div>Нет расписания.</div>;
-     if (schedule.days_off.includes(today)) return <div>Сегодня выходной</div>;
+     if (!schedule) return;
+     if (schedule.days_off.includes(today)) return <div className={styles.container}>
+               <h2 className={styles.header}>Сегодня выходной!</h2> 
+          </div>;
 
      const appointments = schedule.appointments;
 
      if (!appointments || appointments.length === 0) {
-          return <div>На сегодня нет записей</div>;
+          return <div className={styles.container}>
+               <h2 className={styles.header}>На сегодня нет записей</h2> 
+          </div>;
      }
 
      return (

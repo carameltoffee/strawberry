@@ -25,6 +25,10 @@ export const getWorks = (userId: string): AppThunk => async (dispatch) => {
                method: 'GET',
           });
           const data = await response.json();
+          if (data?.error == "cannot get works") {
+               dispatch(setWorksLoadSuccess(data));
+               return;
+          }
           if (!response.ok) throw new Error(data?.error || 'Неизвестная ошибка');
 
           dispatch(setWorksLoadSuccess(data));
