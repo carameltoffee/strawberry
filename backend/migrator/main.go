@@ -54,11 +54,11 @@ func main() {
 }
 
 func buildDatabaseURLFromEnv() string {
-	host := getEnvOrDefault("DB_HOST", "localhost")
-	port := getEnvOrDefault("DB_PORT", "5432")
-	user := getEnvOrDefault("DB_USER", "postgres")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := getEnvOrDefault("DB_NAME", "postgres")
+	host := getEnvOrDefault("PGHOST", "localhost")
+	port := getEnvOrDefault("PGPORT", "5432")
+	user := getEnvOrDefault("PGUSER", "postgres")
+	password := os.Getenv("PGPASSWORD")
+	dbname := getEnvOrDefault("PGDATABASE", "postgres")
 	sslmode := getEnvOrDefault("DB_SSLMODE", "disable")
 
 	if password != "" {

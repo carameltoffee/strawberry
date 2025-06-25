@@ -11,11 +11,11 @@ type Config struct {
 		Port int `envconfig:"PORT" default:"8080"`
 	}
 	Database struct {
-		User     string `envconfig:"DB_USER" required:"true"`
-		Password string `envconfig:"DB_PASSWORD" required:"true"`
-		Host     string `envconfig:"DB_HOST" default:"localhost"`
-		Port     string `envconfig:"DB_PORT" default:"5432"`
-		Name     string `envconfig:"DB_NAME" required:"true"`
+		User     string `envconfig:"PGUSER" required:"true"`
+		Password string `envconfig:"PGPASSWORD" required:"true"`
+		Host     string `envconfig:"PGHOST" default:"localhost"`
+		Port     string `envconfig:"PGPORT" default:"5432"`
+		Name     string `envconfig:"PGDATABASE" required:"true"`
 		SSLMode  string `envconfig:"DB_SSLMODE" default:"disable"`
 	}
 	Jwt struct {
@@ -38,9 +38,9 @@ type Config struct {
 		Password string `envconfig:"SMTP_PASSWORD" required:"true"`
 	}
 	Redis struct {
-		Addr     string `envconfig:"REDIS_HOST" default:"redis"`
-		Password string `envconfig:"REDIS_PASSWORD" required:"true"`
-		Port       int    `envconfig:"REDIS_PORT" default:"6379"`
+		Addr     string `envconfig:"REDISHOST" default:"redis"`
+		Password string `envconfig:"REDISPASSWORD" required:"true"`
+		Port     int    `envconfig:"REDISPORT" default:"6379"`
 	}
 	Verification struct {
 		TTL time.Duration `envconfig:"VERIFICATION_TTL" default:"10m"`
