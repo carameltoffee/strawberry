@@ -30,6 +30,7 @@ type Config struct {
 		SecretKey string `envconfig:"MINIO_ROOT_PASSWORD" required:"true"`
 		SslMode   bool   `envconfig:"MINIO_SSLMODE" default:"false"`
 		Endpoint  string `envconfig:"MINIO_ENDPOINT" default:"localhost:9000"`
+		Location  string `envconfig:"MINIO_LOCATION" required:"false"`
 	}
 	Smtp struct {
 		Host     string `envconfig:"SMTP_HOST" required:"true"`

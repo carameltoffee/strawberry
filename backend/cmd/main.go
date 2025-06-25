@@ -58,7 +58,7 @@ func main() {
 
 	repo := repository.New(pool, redis)
 	minio, err := minio_client.New(cfg.Minio.Endpoint, cfg.Minio.AccessKey,
-		cfg.Minio.SecretKey, cfg.Minio.SslMode)
+		cfg.Minio.SecretKey, cfg.Minio.SslMode, cfg.Minio.Location)
 	if err != nil {
 		log.Error("minio doesn't work")
 	}

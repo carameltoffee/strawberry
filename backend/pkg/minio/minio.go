@@ -11,18 +11,20 @@ import (
 )
 
 type MinioClient struct {
-	client *minio.Client
-	ctx    context.Context
+	client   *minio.Client
+	ctx      context.Context
+	location string
 }
 
-func New(endpoint, accessKey, secretKey string, useSSL bool) (*MinioClient, error) {
+func New(endpoint, accessKey, secretKey string, useSSL bool, location string) (*MinioClient, error) {
 	cli, err := minio.New(endpoint, accessKey, secretKey, useSSL)
 	if err != nil {
 		return nil, err
 	}
 	return &MinioClient{
-		client: cli,
-		ctx:    context.Background(),
+		client:   cli,
+		ctx:      context.Background(),
+		location: location,
 	}, nil
 }
 
@@ -30,13 +32,13 @@ func (m *MinioClient) BucketExists(bucket string) (bool, error) {
 	return m.client.BucketExists(bucket)
 }
 
-func (m *MinioClient) CreateBucket(bucket, location string) error {
+func (m *MinioClient) CreateBucket(bucket string) error {
 	exists, err := m.BucketExists(bucket)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		return m.client.MakeBucket(bucket, location)
+		return m.client.MakeBucket(bucket, m.location)
 	}
 	return nil
 }
@@ -55,10 +57,10 @@ func (m *MinioClient) DownloadFile(bucket, key string) (io.ReadCloser, error) {
 }
 
 func (m *MinioClient) UploadAvatar(userId int64, reader io.Reader, size int64, contentType string) error {
-	bucket := "avatars"
+	bucket := "avatarsbonbontime"
 	key := fmt.Sprint(userId) + ".jpg"
 
-	if err := m.CreateBucket(bucket, "minio"); err != nil {
+	if err := m.CreateBucket(bucket); err != nil {
 		return err
 	}
 
@@ -66,22 +68,22 @@ func (m *MinioClient) UploadAvatar(userId int64, reader io.Reader, size int64, c
 }
 
 func (m *MinioClient) GetAvatar(userId int64) (io.ReadCloser, error) {
-	bucket := "avatars"
+	bucket := "avatarsbonbontime"
 	key := fmt.Sprint(userId) + ".jpg"
 	return m.DownloadFile(bucket, key)
 }
 
 func (m *MinioClient) GetWork(userId int64, workId string) (io.ReadCloser, error) {
-	bucket := "works"
+	bucket := "worksbonbontime"
 	key := fmt.Sprintf("%d/%s", userId, workId)
 	return m.DownloadFile(bucket, key)
 }
 
 func (m *MinioClient) UploadWork(userId int64, workId string, reader io.Reader, size int64, contentType string) error {
-	bucket := "works"
+	bucket := "worksbonbontime"
 	key := fmt.Sprintf("%d/%s", userId, workId)
 
-	if err := m.CreateBucket(bucket, "minio"); err != nil {
+	if err := m.CreateBucket(bucket); err != nil {
 		return err
 	}
 
@@ -94,7 +96,7 @@ type WorkFile struct {
 }
 
 func (m *MinioClient) GetWorksIDs(userId int64) ([]string, error) {
-	bucket := "works"
+	bucket := "worksbonbontime"
 	prefix := fmt.Sprintf("%d/", userId)
 
 	doneCh := make(chan struct{})
@@ -132,13 +134,13 @@ func (m *MinioClient) deleteObject(bucket, key string) error {
 }
 
 func (m *MinioClient) DeleteAvatar(userId int64) error {
-	bucket := "avatars"
+	bucket := "avatarsbonbontime"
 	key := fmt.Sprintf("%d.jpg", userId)
 	return m.deleteObject(bucket, key)
 }
 
 func (m *MinioClient) DeleteWork(userId int64, workId string) error {
-	bucket := "works"
+	bucket := "worksbonbontime"
 	key := fmt.Sprintf("%d/%s", userId, workId)
 	return m.deleteObject(bucket, key)
 }
