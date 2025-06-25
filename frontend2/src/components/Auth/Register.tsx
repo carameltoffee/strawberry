@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { registerUser, sendCode } from './Auth.thunks';
 import styles from './Register.module.css';
 import { Spinner } from '../Spinner/Spinner';
 import { useAppDispatch } from '../../hooks/hooks';
+import { useNavigate } from 'react-router-dom';
+import { RootState } from '../../store/store';
+import { useSelector } from 'react-redux';
 
 export const Register: React.FC = () => {
      const dispatch = useAppDispatch();
+     const navigate = useNavigate();
      const [form, setForm] = useState<IRegisterReq>({
           full_name: '',
           email: '',
@@ -16,6 +20,7 @@ export const Register: React.FC = () => {
      });
      const [sending, setSending] = useState(false);
      const [isSpecialist, setIsSpecialist] = useState(false);
+     const isRegistered = useSelector((state: RootState) => state.auth.isRegistered);
 
      const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           const { name, value } = e.target;
@@ -26,6 +31,12 @@ export const Register: React.FC = () => {
           e.preventDefault();
           dispatch(registerUser(form));
      };
+
+     useEffect(() => {
+          if (isRegistered) {
+               navigate("/login");
+          }
+     }, [isRegistered, navigate]);
 
      const handleSendCode = async () => {
           if (!form.email) return;
@@ -62,7 +73,7 @@ export const Register: React.FC = () => {
                               onClick={handleSendCode}
                               disabled={!form.email || sending}
                          >
-                              {sending ? <Spinner/> : 'Отправить код'}
+                              {sending ? <Spinner /> : 'Отправить код'}
                          </button>
                     </div>
                     <input
@@ -85,15 +96,15 @@ export const Register: React.FC = () => {
                               Я специалист
                          </label>
 
-                    {isSpecialist && (
-                         <input
-                         name="specialization"
-                         placeholder="Специализация"
-                         value={form.specialization}
-                         onChange={handleChange}
-                         className={styles.input}
-                         />
-                    )}
+                         {isSpecialist && (
+                              <input
+                                   name="specialization"
+                                   placeholder="Специализация"
+                                   value={form.specialization}
+                                   onChange={handleChange}
+                                   className={styles.input}
+                              />
+                         )}
                     </div>
                     <input
                          name="username"

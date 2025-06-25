@@ -4,10 +4,12 @@ export interface AuthState {
      user: IUser | null;
      token: string | null;
      loading: boolean;
+     isRegistered: boolean;
      error: string | null;
 }
 
 const initialState: AuthState = {
+     isRegistered: false,
      loading: false,
      token: null,
      user: null,
@@ -22,6 +24,7 @@ export function authReducer(state = initialState, action: AuthActionTypes): Auth
                localStorage.setItem('token', JSON.stringify(action.payload.token))
                localStorage.setItem('user', JSON.stringify(action.payload.user))
                return {
+                    isRegistered: true,
                     user: action.payload.user,
                     token: action.payload.token,
                     loading: false,
@@ -30,7 +33,7 @@ export function authReducer(state = initialState, action: AuthActionTypes): Auth
           case LOGIN_FAILURE:
                return { ...state, user: null, loading: false, error: action.payload };
           case REGISTER_SUCCESS:
-               return { ...state, loading: false, error: null };
+               return { ...state, loading: false, error: null, isRegistered: true };
           case REGISTER_FAILURE:
                return { ...state, loading: false, error: action.payload };
           case SEND_CODE_SUCCESS:
@@ -39,9 +42,9 @@ export function authReducer(state = initialState, action: AuthActionTypes): Auth
                return { ...state, loading: false, error: action.payload };
           case USER_LOADED:
                if(isEmptyObject(action.payload.user)){
-                    return { loading: false, token: "", user: null, error: null };
+                    return { ...state, loading: false, token: "", user: null, error: null };
                }
-               return { loading: false, token: action.payload.token, user: action.payload.user, error: null };
+               return { ...state, loading: false, token: action.payload.token, user: action.payload.user, error: null };
           case LOGOUT:
                localStorage.removeItem('user');
                localStorage.removeItem('token');

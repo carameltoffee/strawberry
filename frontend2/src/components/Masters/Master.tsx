@@ -44,9 +44,9 @@ const Master: React.FC<MasterProps> = ({ masterId }) => {
 					<p><strong>Специализация:</strong> {master.specialization}</p>
 				)}
 				<p><strong>Зарегистрирован:</strong> {new Date(master.registered_at).toLocaleDateString()}</p>
-				{master.average_rating && (
+				{master.average_rating !== undefined && (
 					<Stars rating={master.average_rating}/>
-				)}
+				) }
 			</div>
 
 			<div className={styles.rightCol}>

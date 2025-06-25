@@ -68,7 +68,7 @@ export const registerUser = (req: IRegisterReq): AppThunk => async (dispatch) =>
           if (!response.ok) throw new Error(data?.error || 'Неизвестная ошибка');
 
           dispatch(registerSuccess());
-          dispatch(setSuccessAlert("Вы успешно зарегестрировались!"))
+          dispatch(setSuccessAlert("Вы успешно зарегестрировались! Теперь войдите."))
      } catch (error) {
           if (error instanceof Error) {
                dispatch(setErrorAlert(error.message));

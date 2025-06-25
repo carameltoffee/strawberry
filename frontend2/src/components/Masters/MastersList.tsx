@@ -70,7 +70,7 @@ const MastersList: React.FC = () => {
                          >
                               <h2 className={styles.cardTitle}>{master.full_name}</h2>
                               <p className={styles.cardText}>{master.specialization}</p>
-                              {master.average_rating && (
+                              {master.average_rating !== undefined && (
                                    <Stars rating={master.average_rating} />
                               )}
                          </div>
