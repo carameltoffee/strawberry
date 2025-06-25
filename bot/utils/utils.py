@@ -1,10 +1,15 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Tuple, List
 import jwt  
 
 def parse_date(s: str) -> date:
     dt = datetime.strptime(s, "%Y-%m-%d")
     return dt.date()
+
+def adjust_date_for_utc(date_str: str, tz_offset: int = 3) -> str:
+    local_dt = datetime.strptime(date_str, "%Y-%m-%d")
+    utc_dt = local_dt - timedelta(hours=tz_offset)
+    return utc_dt.strftime("%Y-%m-%d")
 
 def parse_dates(raw_input: str) -> tuple[list, list]:
     raw_dates = raw_input.replace('\n', ' ').split()

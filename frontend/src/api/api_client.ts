@@ -16,6 +16,7 @@ export interface LoginRes {
 export interface RegisterReq {
      full_name: string;
      username: string;
+     code: string;
      email: string;
      password: string;
      specialization?: string;
@@ -73,6 +74,26 @@ export interface Appointment {
      created_at: string;
      status: string;
 }
+
+export interface SendVerificationCodeReq {
+     email: string;
+}
+
+export interface Review {
+     id: number;
+     user_id: number;
+     master_id: number;
+     rating: number;
+     comment: string;
+     created_at: string;
+}
+
+export interface CreateReviewReq {
+     master_id: number;
+     rating: number;
+     comment: string;
+}
+
 
 async function request<T>(
      method: string,
@@ -253,5 +274,24 @@ export const api = {
                throw new Error(errText);
           }
           return await res.blob();
+     },
+     createReview(token: string, input: CreateReviewReq): Promise<Review> {
+          return request("POST", "/reviews", token, input);
+     },
+
+     getReviewsByMasterId(masterId: number): Promise<Review[]> {
+          return request("GET", `/reviews/master/${masterId}`);
+     },
+
+     updateReview(token: string, id: number, input: CreateReviewReq): Promise<Review> {
+          return request("PUT", `/reviews/${id}`, token, input);
+     },
+
+     deleteReview(token: string, id: number): Promise<void> {
+          return request("DELETE", `/reviews/${id}`, token);
+     },
+
+     sendVerificationCode(input: SendVerificationCodeReq): Promise<string> {
+          return request("POST", "/send-code", undefined, input);
      },
 };

@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
      api,
-     type SetDayOffInput,
-     type SetWorkingSlotsInput,
-     type Schedule,
      type User,
-     type Appointment,
      API_BASE,
 } from "../../api/api_client";
 import Notification from "../../components/notification/notification";
