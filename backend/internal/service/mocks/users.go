@@ -22,8 +22,8 @@ func (m *Users) Login(ctx context.Context, identifier, password string) (string,
 	return args.String(0), args.Error(1)
 }
 
-func (m *Users) Update(ctx context.Context, user *models.User) error {
-	args := m.Called(ctx, user)
+func (m *Users) Update(ctx context.Context, id int64, u *models.User) error {
+	args := m.Called(ctx, id, u)
 	return args.Error(0)
 }
 

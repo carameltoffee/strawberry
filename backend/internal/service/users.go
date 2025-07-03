@@ -68,9 +68,20 @@ func (s *UsersService) Create(ctx context.Context, u *models.User) (int64, error
 	return id, nil
 }
 
-func (s *UsersService) Update(ctx context.Context, u *models.User) error {
+func (s *UsersService) Update(ctx context.Context, id int64, u *models.User) error {
 	ctx = logger.WithLogger(ctx)
 	l := logger.FromContext(ctx)
+
+	user, err := s.r.Users.GetById(ctx, u.Id)
+	if err != nil {
+		l.Warn("can't get user by id", zap.Error(err))
+		return ErrNotFound
+	}
+
+	if id != 0 && user.Id != id {
+		l.Warn("unauthorized", zap.Error(err))
+		return ErrUnauthorized
+	}
 
 	if err := u.Validate(); err != nil {
 		l.Warn("invalid user data", zap.Error(err))
