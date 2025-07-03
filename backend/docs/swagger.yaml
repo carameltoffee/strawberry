@@ -75,6 +75,21 @@ definitions:
     - date
     - slots
     type: object
+  handlers.UpdateReq:
+    properties:
+      bio:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      specialization:
+        type: string
+      username:
+        type: string
+    type: object
   handlers.setDayOffInput:
     properties:
       date:
@@ -148,6 +163,8 @@ definitions:
     properties:
       average_rating:
         type: number
+      bio:
+        type: string
       full_name:
         type: string
       id:
@@ -837,6 +854,43 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       summary: Send verification code
+      tags:
+      - auth
+  /users:
+    put:
+      consumes:
+      - application/json
+      description: Update User's data such as username , bio,  full_name, specialization
+        and email
+      parameters:
+      - description: update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateReq'
+      responses:
+        "40":
+          description: ""
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "200":
+          description: Апдейт
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update User
       tags:
       - auth
   /users/{id}/avatar:

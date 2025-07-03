@@ -1066,6 +1066,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/users": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update User's data such as username , bio,  full_name, specialization and email",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Update User",
+                "parameters": [
+                    {
+                        "description": "update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Апдейт"
+                    },
+                    "40": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/avatar": {
             "post": {
                 "security": [
@@ -1428,6 +1485,29 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.UpdateReq": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "specialization": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.setDayOffInput": {
             "type": "object",
             "required": [
@@ -1538,6 +1618,9 @@ const docTemplate = `{
             "properties": {
                 "average_rating": {
                     "type": "number"
+                },
+                "bio": {
+                    "type": "string"
                 },
                 "full_name": {
                     "type": "string"
