@@ -119,3 +119,63 @@ func (h *Handler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, &LoginRes{Token: token})
 }
+
+type UpdateReq struct {
+	Id             int64  `json:"id"`
+	Username       string `json:"username"`
+	Email          string `json:"email"`
+	Specialization string `json:"specialization"`
+	Bio            string `json:"bio"`
+	FullName       string `json:"full_name"`
+}
+
+// @Summary Update User
+// @Description Update User's data such as username , bio,  full_name, specialization and email
+// @Tags auth
+// @Security BearerAuth
+// @Accept json
+// @Param input body UpdateReq true "update data"
+// @Success 200 "Апдейт"
+// @Failure 400 {object} ErrorResponse
+// @Failure 409 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /users [put]
+func (h *Handler) UpdateUser(c *gin.Context) {
+	claims, ok := getClaims(c)
+	if !ok {
+		newErrorResponse(http.StatusUnauthorized, "unauthorized", c)
+		return
+	}
+
+	var data *UpdateReq
+	if err := c.ShouldBindJSON(&data); err != nil {
+		newErrorResponse(http.StatusBadRequest, "bad data", c)
+		return
+	}
+	err := h.s.Users.Update(c.Request.Context(), claims.Id, &models.User{
+		Id:             data.Id,
+		Username:       data.Username,
+		FullName:       data.FullName,
+		Bio:            data.Bio,
+		Specialization: data.Specialization,
+		Email:          data.Email,
+		Password:       "pLACEHOLDERPASSWORD_42",
+	})
+	if err != nil {
+		if errors.Is(err, service.ErrInternal) {
+			newErrorResponse(http.StatusInternalServerError, "something on our side", c)
+			return
+		}
+		if errors.Is(err, service.ErrUserExists) {
+			newErrorResponse(http.StatusConflict, "user already exists", c)
+			return
+		}
+		var valErr service.ValidationError
+		if errors.As(err, &valErr) {
+			newErrorResponse(http.StatusBadRequest, valErr.Msg, c)
+			return
+		}
+	}
+	c.Status(http.StatusOK)
+}

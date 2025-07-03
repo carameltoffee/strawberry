@@ -58,6 +58,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				reviews.PUT("/:id", h.UpdateReview)
 				reviews.DELETE("/:id", h.DeleteReview)
 			}
+			auth.PUT("/users", h.UpdateUser)
 			auth.GET("/masters/appointments", h.GetMasterAppointments)
 			auth.POST("users/works", h.UploadMasterWork)
 			auth.POST("/users/avatar", h.UploadAvatar)
