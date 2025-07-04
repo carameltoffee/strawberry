@@ -28,7 +28,7 @@ const Header: React.FC = () => {
           <header className={styles.header}>
                <Link to="/" className={styles.logo}>
                     <img src={Logo}/>
-                    <strong>Бон Бон Записи</strong>
+                    <strong>BB</strong>
                </Link>
                <nav className={styles.nav}>
                     {user ? (
