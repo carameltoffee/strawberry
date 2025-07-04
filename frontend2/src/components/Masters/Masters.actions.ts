@@ -6,8 +6,11 @@ export const MASTER_LOAD_REQUEST = "MASTER_LOAD_REQUEST";
 export const MASTER_LOAD_SUCCESS = "MASTER_LOAD_SUCCESS";
 export const MASTER_LOAD_FAILURE = "MASTER_LOAD_FAILURE";
 
+export const MASTER_UPDATE_SUCCESS = "MASTER_UPDATE_SUCCESS";
+export const MASTER_UPDATE_FAILURE = "MASTER_UPDATE_FAILURE";
+
 export type MastersActionTypes = MastersLoadSuccess | MastersLoadFailure | MastersLoadRequest
-     | MasterLoadFailureAction | MasterLoadRequestAction | MasterLoadSuccessAction;
+     | MasterLoadFailureAction | MasterLoadRequestAction | MasterLoadSuccessAction | MasterUpdateSuccess | MasterUpdateFailure;
 
 
 export interface MasterLoadRequestAction {
@@ -34,6 +37,17 @@ interface MastersLoadSuccess {
 
 interface MastersLoadFailure {
      type: typeof MASTERS_LOAD_FAILURE,
+     payload: {
+          error: string,
+     }
+}
+
+interface MasterUpdateSuccess {
+     type: typeof MASTER_UPDATE_SUCCESS,
+}
+
+interface MasterUpdateFailure {
+     type: typeof MASTER_UPDATE_FAILURE,
      payload: {
           error: string,
      }
@@ -72,5 +86,14 @@ export const setMasterLoadSuccess = (master: IUser): MasterLoadSuccessAction => 
 
 export const setMasterLoadFailure = (error: string): MasterLoadFailureAction => ({
      type: MASTER_LOAD_FAILURE,
+     payload: { error },
+});
+
+export const setMasterUpdateSuccess = (): MasterUpdateSuccess => ({
+     type: MASTER_UPDATE_SUCCESS,
+});
+
+export const setMasterUpdateFailure = (error: string): MasterUpdateFailure => ({
+     type: MASTER_UPDATE_FAILURE,
      payload: { error },
 });

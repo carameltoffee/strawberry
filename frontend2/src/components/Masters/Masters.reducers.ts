@@ -1,4 +1,4 @@
-import { MASTER_LOAD_FAILURE, MASTER_LOAD_REQUEST, MASTER_LOAD_SUCCESS, MASTERS_LOAD_FAILURE, MASTERS_LOAD_REQUEST, MASTERS_LOAD_SUCCESS, MastersActionTypes } from "./Masters.actions";
+import { MASTER_LOAD_FAILURE, MASTER_LOAD_REQUEST, MASTER_LOAD_SUCCESS, MASTER_UPDATE_FAILURE, MASTER_UPDATE_SUCCESS, MASTERS_LOAD_FAILURE, MASTERS_LOAD_REQUEST, MASTERS_LOAD_SUCCESS, MastersActionTypes } from "./Masters.actions";
 
 export interface MastersState {
      loading: boolean;
@@ -37,6 +37,12 @@ export function mastersReducer(state = initialState, action: MastersActionTypes)
                          ...mastersById,
                     },
                };
+          case MASTER_UPDATE_SUCCESS:
+                return {
+                    ...state,
+                    loading: false,
+                    error: null,
+               };
           case MASTER_LOAD_SUCCESS:
                const master = action.payload.master;
                return {
@@ -50,6 +56,7 @@ export function mastersReducer(state = initialState, action: MastersActionTypes)
                };
           case MASTERS_LOAD_FAILURE:
           case MASTER_LOAD_FAILURE:
+          case MASTER_UPDATE_FAILURE:
                return {
                     ...state,
                     loading: false,
