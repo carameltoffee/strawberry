@@ -495,6 +495,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/restore": {
+            "post": {
+                "description": "Verifies a code and sets a new password for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Restore password",
+                "parameters": [
+                    {
+                        "description": "Restore request payload",
+                        "name": "restore",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RestoreReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data or validation error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid code",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/reviews": {
             "post": {
                 "security": [
@@ -1096,14 +1154,14 @@ const docTemplate = `{
                     "200": {
                         "description": "Апдейт"
                     },
-                    "40": {
-                        "description": "",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -1456,6 +1514,20 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.RestoreReq": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },

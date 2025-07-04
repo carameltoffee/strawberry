@@ -243,6 +243,30 @@ func (s *UsersService) Search(ctx context.Context, query string) ([]models.User,
 	return s.enrichWithRatings(ctx, users), nil
 }
 
+func (s *UsersService) ChangePassword(ctx context.Context, email string, new_pswrd string) error {
+	ctx = logger.WithLogger(ctx)
+	l := logger.FromContext(ctx)
+
+	if err := models.ValidatePassword(new_pswrd); err != nil {
+		return &ValidationError{Msg: err.Error()}
+	}
+
+	user, err := s.r.GetByEmail(ctx, email)
+	if err != nil {
+		l.Error("can't get user by email", zap.Error(err))
+		if errors.Is(err, repository.ErrNoUsers) {
+			return ErrNotFound
+		}
+		return ErrInternal
+	}
+	hashed := s.h.HashString(new_pswrd)
+	if err := s.r.ChangePassword(ctx, user.Id, hashed); err != nil {
+		l.Error("can't change pswrd", zap.Error(err))
+		return ErrInternal
+	}
+	return nil
+}
+
 func (s *UsersService) enrichWithRatings(ctx context.Context, users []models.User) []models.User {
 	for i := range users {
 		r, err := s.r.Reviews.AverageRatingOfMaster(ctx, users[i].Id)

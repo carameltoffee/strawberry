@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strawberry/internal/models"
 	"strawberry/internal/service"
@@ -176,6 +177,53 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 			newErrorResponse(http.StatusBadRequest, valErr.Msg, c)
 			return
 		}
+	}
+	c.Status(http.StatusOK)
+}
+
+type RestoreReq struct {
+	Email    string `json:"email"`
+	Code     string `json:"code"`
+	Password string `json:"password"`
+}
+
+// Restore godoc
+// @Summary      Restore password
+// @Description  Verifies a code and sets a new password for the user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        restore body RestoreReq true "Restore request payload"
+// @Success      200 {string} string "OK"
+// @Failure      400 {object} ErrorResponse "Invalid data or validation error"
+// @Failure      401 {object} ErrorResponse "Invalid code"
+// @Failure      404 {object} ErrorResponse "User not found"
+// @Failure      500 {object} ErrorResponse "Internal server error"
+// @Router       /restore [post]
+func (h *Handler) Restore(c *gin.Context) {
+	var data *RestoreReq
+	if err := c.ShouldBindBodyWithJSON(&data); err != nil {
+		newErrorResponse(http.StatusBadRequest, "invalid data", c)
+		return
+	}
+	err := h.s.VerificationCode.VerifyCode(c.Request.Context(), data.Email, data.Code)
+	if err != nil {
+		newErrorResponse(http.StatusUnauthorized, "invalid code", c)
+		return
+	}
+	if err := h.s.Users.ChangePassword(c.Request.Context(), data.Email, data.Password); err != nil {
+		var valErr service.ValidationError
+		if errors.As(err, &valErr) {
+			newErrorResponse(http.StatusBadRequest, valErr.Msg, c)
+			return
+		}
+		if errors.Is(err, service.ErrNotFound) {
+			newErrorResponse(http.StatusNotFound, "that user does not exists", c)
+			return
+		}
+		fmt.Println(err)
+		newErrorResponse(http.StatusInternalServerError, "something on our side", c)
+		return
 	}
 	c.Status(http.StatusOK)
 }

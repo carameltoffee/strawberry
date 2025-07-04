@@ -20,24 +20,47 @@ type User struct {
 }
 
 func (u *User) Validate() error {
-	if len(strings.TrimSpace(u.FullName)) < 2 || len(u.FullName) > 255 {
+	if err := ValidateFullName(u.FullName); err != nil {
+		return err
+	}
+	if err := ValidateUsername(u.Username); err != nil {
+		return err
+	}
+	if err := ValidatePassword(u.Password); err != nil {
+		return err
+	}
+	if err := ValidateAverageRating(u.AverageRating); err != nil {
+		return err
+	}
+	return nil
+}
+
+func ValidateFullName(fullname string) error {
+	name := strings.TrimSpace(fullname)
+	if len(name) < 2 || len(name) > 255 {
 		return errors.New("full name must be between 2 and 255 characters")
 	}
+	return nil
+}
 
-	if len(u.Username) < 3 || len(u.Username) > 100 {
+func ValidateUsername(username string) error {
+	if len(username) < 3 || len(username) > 100 {
 		return errors.New("username must be between 3 and 100 characters")
 	}
-	for _, r := range u.Username {
+	for _, r := range username {
 		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
 			return errors.New("username must contain only letters and digits")
 		}
 	}
+	return nil
+}
 
-	if len(u.Password) < 8 {
+func ValidatePassword(password string) error {
+	if len(password) < 8 {
 		return errors.New("password must be at least 8 characters long")
 	}
 	var hasLetter, hasDigit bool
-	for _, r := range u.Password {
+	for _, r := range password {
 		switch {
 		case unicode.IsLetter(r):
 			hasLetter = true
@@ -48,10 +71,12 @@ func (u *User) Validate() error {
 	if !hasLetter || !hasDigit {
 		return errors.New("password must contain at least one letter and one digit")
 	}
+	return nil
+}
 
-	if u.AverageRating < 0 || u.AverageRating > 5 {
+func ValidateAverageRating(avg_rating float64) error {
+	if avg_rating < 0 || avg_rating > 5 {
 		return errors.New("average rating must be between 0 and 5")
 	}
-
 	return nil
 }

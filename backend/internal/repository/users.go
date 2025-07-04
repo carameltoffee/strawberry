@@ -234,3 +234,22 @@ func (r *postgresUsersRepository) GetByEmail(ctx context.Context, email string) 
 
 	return &user, nil
 }
+
+func (r *postgresUsersRepository) ChangePassword(ctx context.Context, id int64, new_pswrd string) error {
+	query := `
+		UPDATE users 
+		SET password = $1
+		WHERE id = $2;
+	`
+	result, err := r.db.Exec(ctx, query, new_pswrd, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return ErrNoUsers
+	}
+
+	return nil
+}

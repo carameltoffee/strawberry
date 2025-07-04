@@ -37,6 +37,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		api.POST("/register", h.Register)
 		api.POST("/login", h.Login)
+		api.POST("/restore", h.Restore)
 
 		api.GET("/masters", h.GetMasters)
 		api.GET("/masters/:username", h.GetMasterByUsername)

@@ -58,6 +58,15 @@ definitions:
       id:
         type: integer
     type: object
+  handlers.RestoreReq:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   handlers.SendVerificationCodeReq:
     properties:
       email:
@@ -491,6 +500,44 @@ paths:
       summary: Register a new user or master
       tags:
       - auth
+  /restore:
+    post:
+      consumes:
+      - application/json
+      description: Verifies a code and sets a new password for the user
+      parameters:
+      - description: Restore request payload
+        in: body
+        name: restore
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RestoreReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Invalid data or validation error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Invalid code
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Restore password
+      tags:
+      - auth
   /reviews:
     post:
       consumes:
@@ -870,14 +917,14 @@ paths:
         schema:
           $ref: '#/definitions/handlers.UpdateReq'
       responses:
-        "40":
-          description: ""
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
         "200":
           description: Апдейт
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
         "409":
