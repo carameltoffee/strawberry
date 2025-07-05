@@ -3,12 +3,16 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"strawberry/internal/models"
 	"strawberry/internal/repository"
 	hasher "strawberry/pkg/hash"
+	"strawberry/pkg/helper"
 	"strawberry/pkg/jwt"
 	"strawberry/pkg/logger"
+	"strawberry/pkg/mail"
 
 	"go.uber.org/zap"
 )
@@ -19,6 +23,7 @@ var (
 	ErrUserNotFound       = errors.New("user not found")
 	ErrUserExists         = errors.New("user exists")
 	ErrUnauthorized       = errors.New("unauthorized")
+	ErrCannotSend         = errors.New("can't send the email notification")
 )
 
 type ValidationError struct {
@@ -30,16 +35,18 @@ func (v ValidationError) Error() string {
 }
 
 type UsersService struct {
-	r *repository.Repository
-	j jwt.JwtManager
-	h *hasher.Hasher
+	r    *repository.Repository
+	j    jwt.JwtManager
+	h    *hasher.Hasher
+	mail mail.MailClient
 }
 
-func newUsersService(r *repository.Repository, j jwt.JwtManager, h *hasher.Hasher) Users {
+func newUsersService(r *repository.Repository, j jwt.JwtManager, h *hasher.Hasher, mail mail.MailClient) Users {
 	return &UsersService{
-		r: r,
-		j: j,
-		h: h,
+		r:    r,
+		j:    j,
+		h:    h,
+		mail: mail,
 	}
 }
 
@@ -229,6 +236,10 @@ func (s *UsersService) Login(ctx context.Context, identifier, pswrd string) (str
 		return "", ErrInternal
 	}
 
+	_ = helper.Retry(ctx, 5, time.Second, func() error {
+		return s.mail.Send(user.Email, "Вы входили в аккаунт?", fmt.Sprintf("Вы входили в аккаунт в %s? Если это были не вы, немедленно смените пароль.", time.Now().Format("2006.01.02 в 15:04")))
+	})
+
 	return token, nil
 }
 func (s *UsersService) Search(ctx context.Context, query string) ([]models.User, error) {
@@ -263,6 +274,12 @@ func (s *UsersService) ChangePassword(ctx context.Context, email string, new_psw
 	if err := s.r.ChangePassword(ctx, user.Id, hashed); err != nil {
 		l.Error("can't change pswrd", zap.Error(err))
 		return ErrInternal
+	}
+	err = helper.Retry(ctx, 5, time.Second, func() error {
+		return s.mail.Send(email, "Вы меняли ваш пароль?", "Похоже что вы изменили свой пароль, если вы этого не делали, смените свой пароль от почты и на сайте")
+	})
+	if err != nil {
+		return ErrCannotSend
 	}
 	return nil
 }

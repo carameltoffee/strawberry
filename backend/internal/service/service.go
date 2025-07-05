@@ -91,7 +91,7 @@ type Deps struct {
 
 func New(d *Deps) *Service {
 	return &Service{
-		Users:            newUsersService(d.Repository, d.JwtMgr, d.Hasher),
+		Users:            newUsersService(d.Repository, d.JwtMgr, d.Hasher, d.MailClient),
 		Appointments:     newAppointmentsService(d.Repository, d.RabbitMq, d.MailClient),
 		Schedules:        newSchedulesService(d.Repository),
 		File:             newFileService(d.Minio),
