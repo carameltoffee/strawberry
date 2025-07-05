@@ -105,7 +105,8 @@ func (r *postgresAppointmentsRepository) Delete(ctx context.Context, id int64) e
 func (r *postgresAppointmentsRepository) GetByUserId(ctx context.Context, id int64) ([]models.Appointment, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id, user_id, master_id, scheduled_at, created_at, status
-		FROM appointments WHERE user_id = $1;
+		FROM appointments 
+		WHERE user_id = $1 AND scheduled_at >= NOW();
 	`, id)
 	if err != nil {
 		return nil, err
@@ -119,9 +120,6 @@ func (r *postgresAppointmentsRepository) GetByUserId(ctx context.Context, id int
 			return nil, err
 		}
 		apts = append(apts, a)
-	}
-	if len(apts) == 0 {
-		return apts, nil
 	}
 	return apts, nil
 }
@@ -129,7 +127,8 @@ func (r *postgresAppointmentsRepository) GetByUserId(ctx context.Context, id int
 func (r *postgresAppointmentsRepository) GetByMasterId(ctx context.Context, id int64) ([]models.Appointment, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id, user_id, master_id, scheduled_at, created_at, status
-		FROM appointments WHERE master_id = $1;
+		FROM appointments 
+		WHERE master_id = $1 AND scheduled_at >= NOW();
 	`, id)
 	if err != nil {
 		return nil, err
@@ -144,12 +143,8 @@ func (r *postgresAppointmentsRepository) GetByMasterId(ctx context.Context, id i
 		}
 		apts = append(apts, a)
 	}
-	if len(apts) == 0 {
-		return apts, nil
-	}
 	return apts, nil
 }
-
 func (r *postgresAppointmentsRepository) GetByDate(ctx context.Context, id int64, date time.Time) ([]models.Appointment, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id, user_id, master_id, scheduled_at, created_at, status
