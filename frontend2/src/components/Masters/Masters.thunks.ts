@@ -1,6 +1,6 @@
 import { ThunkAction } from "redux-thunk";
 import { RootState } from "../../store/store";
-import { MastersActionTypes, sendMasterLoadReq, sendMastersLoadReq, setMasterLoadFailure, setMasterLoadSuccess, setMastersLoadFailure, setMastersLoadSuccess, setMasterUpdateSuccess } from "./Masters.actions";
+import { MastersActionTypes, sendMasterLoadReq, sendMastersLoadReq, setMasterLoadFailure, setMasterLoadSuccess, setMastersLoadFailure, setMastersLoadSuccess } from "./Masters.actions";
 import { setErrorAlert, setSuccessAlert } from "../Alert/Alert.thunks";
 
 export type AppThunk<ReturnType = void> = ThunkAction<
