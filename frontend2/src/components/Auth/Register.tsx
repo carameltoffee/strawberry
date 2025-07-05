@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { registerUser, sendCode } from './Auth.thunks';
 import styles from './Register.module.css';
 import { Spinner } from '../Spinner/Spinner';
@@ -6,6 +6,7 @@ import { useAppDispatch } from '../../hooks/hooks';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../store/store';
 import { useSelector } from 'react-redux';
+import { PasswordRepeat } from '../RepeatPassword/RepeatPassword';
 
 export const Register: React.FC = () => {
      const dispatch = useAppDispatch();
@@ -44,6 +45,10 @@ export const Register: React.FC = () => {
           await dispatch(sendCode(form.email));
           setSending(false);
      };
+
+     const handlePasswordChange = useCallback((pwd: string) => {
+          setForm(prev => ({ ...prev, password: pwd }));
+     }, []);
 
      return (
           <div className={styles.container}>
@@ -114,15 +119,7 @@ export const Register: React.FC = () => {
                          className="w-full border p-2 rounded"
                          required
                     />
-                    <input
-                         name="password"
-                         placeholder="Пароль"
-                         type="password"
-                         value={form.password}
-                         onChange={handleChange}
-                         className="w-full border p-2 rounded"
-                         required
-                    />
+                    <PasswordRepeat onChange={handlePasswordChange} />
                     <button type="submit" className={styles.submit}>
                          Зарегистрироваться
                     </button>

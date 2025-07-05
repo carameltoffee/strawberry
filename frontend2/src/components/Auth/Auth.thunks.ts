@@ -88,13 +88,32 @@ export const sendCode = (email: string): AppThunk => async (dispatch) => {
           });
 
           if (!response.ok) throw new Error('Ошибка отправки кода');
-
           dispatch(setSuccessAlert('Код отправлен на почту'));
      } catch (error) {
           const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
           dispatch(setErrorAlert(message));
      }
 };
+
+export const restore = (email: string, code: string, password: string): AppThunk => async (dispatch) => {
+     try {
+          const response = await fetch(`${__BASE_API_URL__}/restore`, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ email, code, password }),
+          });
+          if (!response.ok) {
+               const data = await response.json();
+               throw new Error(data?.error || 'Невозможно изменить пароль')
+          };
+          dispatch(registerSuccess());
+          dispatch(setSuccessAlert('Успешно изменен пароль для входа'));
+     } catch (error) {
+          const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+          dispatch(setErrorAlert(message));
+          dispatch(registerFailure(message));
+     }
+}
 
 export const logout = (): AppThunk => async (dispatch) => {
      dispatch(logoutAction());

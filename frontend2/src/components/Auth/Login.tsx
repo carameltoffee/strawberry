@@ -27,6 +27,10 @@ export const Login: React.FC = () => {
           }
      }, [user, navigate]);
 
+     const handlePassword = () => {
+          navigate("/restore");
+     }
+
      return (
           <form className={styles.form} onSubmit={submitHandler}>
                <h1 className={styles.title}>Вход</h1>
@@ -49,6 +53,7 @@ export const Login: React.FC = () => {
                <button type="submit" className={styles.button} disabled={loading}>
                     {loading ? 'Загрузка...' : 'Войти'}
                </button>
+               <a onClick={handlePassword}>Забыли пароль?</a>
           </form>
 
      );

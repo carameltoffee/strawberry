@@ -4,6 +4,7 @@ import { Register } from "../components/Auth/Register";
 import Reservation from "../pages/Reservation/Reservation";
 import ProfilePage from "../pages/Profile/Profile";
 import MainPage from "../pages/Main/Main";
+import { Restore } from "../components/Auth/Restore";
 
 export const InitRoutes = () => {
      return (
@@ -13,6 +14,7 @@ export const InitRoutes = () => {
                <Route path="/" element={<MainPage/>}/>
                <Route path="/res/:id" element={<Reservation/>}/>
                <Route path="/me" element={<ProfilePage/>}/>
+               <Route path="/restore" element={<Restore/>}/>
           </Routes>
      );
 };
